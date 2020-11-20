@@ -60,8 +60,8 @@ def export(query):
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
-  parser.add_argument('userid', type=str, nargs='?', default = 'sumi', help='Enter userid')
-  parser.add_argument('name', type=str, nargs='?', default = 'yelp_sumi_MB_Realtor', help='Enter name')
+  parser.add_argument('userid', type=str, nargs='?', default = 'shiraz', help='Enter userid')
+  parser.add_argument('name', type=str, nargs='?', default = 'yelp_MB_Realtor', help='Enter name')
   args = parser.parse_args()
 
   userid = args.userid

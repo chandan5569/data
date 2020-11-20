@@ -113,9 +113,9 @@ class Scraper:
             collection.insert_one(document)
     
     def get_scraped_data(self):
-        client = pymongo.MongoClient('mongodb+srv://sumi:'+urllib.parse.quote_plus('sumi@123')+'@codemarket-staging.k16z7.mongodb.net/codemarket_devasish?retryWrites=true&w=majority')
+        client = pymongo.MongoClient('mongodb+srv://sumi:'+urllib.parse.quote_plus('sumi@123')+'@codemarket-staging.k16z7.mongodb.net/codemarket_shiraz?retryWrites=true&w=majority')
         query={'userid': self.userid,'name': self.name}
-        db = client["codemarket_devasish"]
+        db = client["codemarket_shiraz"]
         collection = db[self.collections]
         document = self.create_db(collection, query)
         if document:
@@ -141,15 +141,15 @@ class Scraper:
         self.flag = 0
         self.no_email = True
         print('Begin Scraping')
-        connect(db = 'codemarket_devasish', host = 'mongodb+srv://sumi:'+urllib.parse.quote_plus('sumi@123')+'@codemarket-staging.k16z7.mongodb.net/codemarket_devasish?retryWrites=true&w=majority')
-        while self.no_email and self.flag < 50:
+        connect(db = 'codemarket_shiraz', host = 'mongodb+srv://sumi:'+urllib.parse.quote_plus('sumi@123')+'@codemarket-staging.k16z7.mongodb.net/codemarket_shiraz?retryWrites=true&w=majority')
+        while self.no_email and self.flag < 10:
             chrome_options = Options()
             chrome_options.add_argument("--headless")
             chrome_options.add_argument("--no-sandbox")
             chrome_options.add_argument("--disable-gpu")
             # chrome_options.add_argument('--disable-dev-shm-usage')
-            # driver = webdriver.Chrome('/usr/local/bin/chromedriver',chrome_options=chrome_options)
-            driver = webdriver.Chrome('E:/Codes/chromedriver.exe')#,chrome_options=chrome_options)
+            driver = webdriver.Chrome('/home/dhruv034/Desktop/codemarket/chromedriver_linux64/chromedriver',chrome_options=chrome_options)
+            #driver = webdriver.Chrome('E:/Codes/chromedriver.exe')#,chrome_options=chrome_options)
             try:
                 with switch_collection(MB_scraper, self.collections) as MB_scraper:
                     if self.flag == 0:
@@ -163,7 +163,8 @@ class Scraper:
                         soup = BeautifulSoup(html, 'html.parser')
                         # bussiness_list = soup.find('ul',class_="lemon--ul__373c0__1_cxs undefined list__373c0__2G8oH")
                         # bussiness_list = soup.find('ul',class_="lemon--ul__09f24__1_cxs undefined list__09f24__OXDHW")
-                        bussiness_list = soup.find('ul',class_="lemon--ul__09f24__1_cxs undefined list__09f24__17TsU")
+                        bussiness_list = soup.find('div',class_="growContainer__09f24__da8cO display--inline-block__09f24__FsgS4 border-color--default__09f24__R1nRO")
+
                         lilist = bussiness_list.findChildren(['li'])
                         for li in lilist:
                             status = 'Scraping website'
@@ -171,7 +172,8 @@ class Scraper:
                             MB_scraper.objects(userid = self.userid, name = self.name).update(set__status = status)
                             # link = li.find('a',class_='lemon--a__373c0__IEZFH link__373c0__1G70M link-color--inherit__373c0__3dzpk link-size--inherit__373c0__1VFlE')
                             # link = li.find('a',class_='lemon--a__373c0__IEZFH link__373c0__1UGBs photo-box-link__373c0__1AMDk link-color--blue-dark__373c0__12C_y link-size--default__373c0__3m55w')
-                            link = li.find('a',class_="lemon--a__09f24__IEZFH link__09f24__1kwXV link-color--inherit__09f24__3PYlA link-size--inherit__09f24__2Uj95")
+                            link = li.find('button',class_="pill-container__09f24__21XGO filterToggle__09f24__40Unn growFilter__09f24__1jDas leftRounded__09f24__2FatH noRightBorder__09f24__Eg2Fe growFilterContainer__09f24__2XPZj button__09f24__1VFaY")
+
                             if link == None:
                                 continue
                         
@@ -181,7 +183,7 @@ class Scraper:
                             profile_soup = BeautifulSoup(profile, 'html.parser')
                             websitelink = None
                             # lemon--h1__373c0__2ZHSL heading--h1__373c0___56D3 undefined heading--inline__373c0__1jeAh
-                            business_name = profile_soup.find('h1',class_ = "lemon--h1__373c0__2ZHSL heading--h1__373c0__dvYgw undefined heading--inline__373c0__10ozy").text
+                            business_name = profile_soup.find('span',class_ = "text__09f24__2tZKC text-color--inherit__09f24__1jgBv text-align--left__09f24__3Drs0 text-weight--semibold__09f24__MTlNc text-size--small__09f24__1Z_UI").text
                             
                             address_line2, street, city, state = ' '*4
                             postal_code, telephone = 0, 0
@@ -321,12 +323,12 @@ class Scraper:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('userid',type=str,nargs='?',default='devasish',help='Enter userid')
+    parser.add_argument('userid',type=str,nargs='?',default='shiraz',help='Enter userid')
     parser.add_argument('name',type=str,nargs='?',default='yelp_scraper',help='Enter name')
     parser.add_argument('keyword',type=str,nargs='?',default=urllib.parse.quote_plus('Realtor'),help='Enter keyword')
-    parser.add_argument('city',type=str,nargs='?',default=urllib.parse.quote_plus('Manhattan Beach, CA'),help='Enter city')
+    parser.add_argument('city',type=str,nargs='?',default=urllib.parse.quote_plus('Los Angeles, CA'),help='Enter city')
     parser.add_argument('start_limit',type=int,nargs='?',default=1, help='Enter limit')
-    parser.add_argument('end_limit',type=int,nargs='?',default=24, help='Enter limit')
+    parser.add_argument('end_limit',type=int,nargs='?',default=5, help='Enter limit')
     args = parser.parse_args()
 
     userid = args.userid
