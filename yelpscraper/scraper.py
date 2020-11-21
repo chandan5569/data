@@ -161,8 +161,6 @@ class Scraper:
                         driver.get(url)
                         html = driver.page_source
                         soup = BeautifulSoup(html, 'html.parser')
-                        # bussiness_list = soup.find('ul',class_="lemon--ul__373c0__1_cxs undefined list__373c0__2G8oH")
-                        # bussiness_list = soup.find('ul',class_="lemon--ul__09f24__1_cxs undefined list__09f24__OXDHW")
                         bussiness_list = soup.find('div',class_="growContainer__09f24__da8cO display--inline-block__09f24__FsgS4 border-color--default__09f24__R1nRO")
 
                         lilist = bussiness_list.findChildren(['li'])
@@ -170,8 +168,6 @@ class Scraper:
                             status = 'Scraping website'
                             self.email_counter = 0
                             MB_scraper.objects(userid = self.userid, name = self.name).update(set__status = status)
-                            # link = li.find('a',class_='lemon--a__373c0__IEZFH link__373c0__1G70M link-color--inherit__373c0__3dzpk link-size--inherit__373c0__1VFlE')
-                            # link = li.find('a',class_='lemon--a__373c0__IEZFH link__373c0__1UGBs photo-box-link__373c0__1AMDk link-color--blue-dark__373c0__12C_y link-size--default__373c0__3m55w')
                             link = li.find('button',class_="pill-container__09f24__21XGO filterToggle__09f24__40Unn growFilter__09f24__1jDas leftRounded__09f24__2FatH noRightBorder__09f24__Eg2Fe growFilterContainer__09f24__2XPZj button__09f24__1VFaY")
 
                             if link == None:
@@ -182,7 +178,6 @@ class Scraper:
                             profile = driver.page_source
                             profile_soup = BeautifulSoup(profile, 'html.parser')
                             websitelink = None
-                            # lemon--h1__373c0__2ZHSL heading--h1__373c0___56D3 undefined heading--inline__373c0__1jeAh
                             business_name = profile_soup.find('span',class_ = "text__09f24__2tZKC text-color--inherit__09f24__1jgBv text-align--left__09f24__3Drs0 text-weight--semibold__09f24__MTlNc text-size--small__09f24__1Z_UI").text
                             
                             address_line2, street, city, state = ' '*4
