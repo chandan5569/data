@@ -15,6 +15,7 @@ from sys import stdout
 import pandas as pd
 from validate_email import validate_email
 import traceback
+from gazpacho import Soup
 
 class Website(EmbeddedDocument):
     business_name = StringField(max_length=250, required=True)
@@ -167,12 +168,14 @@ class Scraper:
                         print("URL")
                         print(url)
                         soup = BeautifulSoup(html, 'html.parser')
-                        print("soup")
-                        print(soup)
+                        # print("soup")
+                        # print(soup)
                         # bussiness_list = soup.find('ul',class_="lemon--ul__373c0__1_cxs undefined list__373c0__2G8oH")
                         # bussiness_list = soup.find('ul',class_="lemon--ul__09f24__1_cxs undefined list__09f24__OXDHW")
-                        bussiness_list = soup.find('ul',class_="lemon--ul__09f24__1_cxs undefined list__09f24__17TsU")
-                        print("bussiness_list")
+                        # bussiness_list = soup.find('ul',class_="lemon--ul__09f24__1_cxs undefined list__09f24__17TsU")
+                        # bussiness_list = soup.find('a',class_="link_09f241kwXV link-color--inherit09f24_3PYlA")
+                        bussiness_list = soup.find("a", {"class": "link__09f24__1kwXV"}, partial=True)
+                        print("bussiness_list--")
                         print(bussiness_list)
                         lilist = bussiness_list.findChildren(['li'])
                         for li in lilist:

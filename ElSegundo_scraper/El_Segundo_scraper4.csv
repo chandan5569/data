@@ -1,0 +1,23 @@
+User.UserAttributes.business_name,Attributes.website_link,User.UserAttributes.category,Address,User.UserAttributes.telephone,Attributes.address_Line1,Location.Region,Location.City,Location.PostalCode,ChannelType
+"Teledyne Controls, LLC",http://www.teledynecontrols.com,Aircraft Data and Information Solutions,krios@teledyne.com,3107653714.0,501 Continental Blvd.PO Box 1026,CA,El Segundo,90245.0,EMAIL
+"Teledyne Controls, LLC",http://www.teledynecontrols.com,Aircraft Data and Information Solutions,ctl_customer_support@teledyne.com,3107653714.0,501 Continental Blvd.PO Box 1026,CA,El Segundo,90245.0,EMAIL
+"Teledyne Controls, LLC",http://www.teledynecontrols.com,Aircraft Data and Information Solutions,lisa.buckland@teledyne.com,3107653714.0,501 Continental Blvd.PO Box 1026,CA,El Segundo,90245.0,EMAIL
+Los Angeles World Airports,http://www.flyLAX.com,Airports,gpacheco@lawa.org,4246467460.0,"6053 W. Century Blvd. Suite 3011 World Way, Skyview Bldg., 3rd Floor",CA,Los Angeles,90045.0,EMAIL
+Los Angeles World Airports,http://www.flyLAX.com,Airports,ssampson@lawa.org,4246467460.0,"6053 W. Century Blvd. Suite 3011 World Way, Skyview Bldg., 3rd Floor",CA,Los Angeles,90045.0,EMAIL
+Los Angeles World Airports,http://www.flyLAX.com,Airports,laxconstructionhotline@lawa.org,4246467460.0,"6053 W. Century Blvd. Suite 3011 World Way, Skyview Bldg., 3rd Floor",CA,Los Angeles,90045.0,EMAIL
+Los Angeles World Airports,http://www.flyLAX.com,Airports,hhuebner@lawa.org,4246467460.0,"6053 W. Century Blvd. Suite 3011 World Way, Skyview Bldg., 3rd Floor",CA,Los Angeles,90045.0,EMAIL
+Los Angeles World Airports,http://www.flyLAX.com,Airports,kphan@lawa.org,4246467460.0,"6053 W. Century Blvd. Suite 3011 World Way, Skyview Bldg., 3rd Floor",CA,Los Angeles,90045.0,EMAIL
+Los Angeles World Airports,http://www.flyLAX.com,Airports,sthomas@lawa.org,4246467460.0,"6053 W. Century Blvd. Suite 3011 World Way, Skyview Bldg., 3rd Floor",CA,Los Angeles,90045.0,EMAIL
+Los Angeles World Airports,http://www.flyLAX.com,Airports,nniles@lawa.org,4246467460.0,"6053 W. Century Blvd. Suite 3011 World Way, Skyview Bldg., 3rd Floor",CA,Los Angeles,90045.0,EMAIL
+"ALJCO, ALJ Electronics",http://www.aljco.com,"Appliance sales, parts, service",carolyne@aljco.com,3102917450.0,12529 Crenshaw Blvd,CA,Hawthorne,90250.0,EMAIL
+SAGA Architecture,http://www.sagarchitecture.com,Architect,fglynn@sagarchitecture.com,3103220022.0,233 California Street,CA,El Segundo,90245.0,EMAIL
+Torrance Cultural Arts Foundation,http://www.torrancearts.org,Arts Organization / Non-Profit,info@torrancearts.org,3103788100.0,PO Box 10416,CA,Torrance,90505.0,EMAIL
+Torrance Cultural Arts Foundation,http://www.torrancearts.org,Arts Organization / Non-Profit,sharon@torrancearts.org,3103788100.0,PO Box 10416,CA,Torrance,90505.0,EMAIL
+Torrance Cultural Arts Foundation,http://www.torrancearts.org,Arts Organization / Non-Profit,cwolf@torrancearts.org,3103788100.0,PO Box 10416,CA,Torrance,90505.0,EMAIL
+Los Angeles Glass Center,http://www.laglasscenter.com,Arts and Education,info@laglasscenter.com,3104629723.0,141 Penn Street,CA,El Segundo,90245.0,EMAIL
+Los Angeles Glass Center,http://www.laglasscenter.com,Arts and Education,jc@joecariati.com,3104629723.0,141 Penn Street,CA,El Segundo,90245.0,EMAIL
+Los Angeles Glass Center,http://www.laglasscenter.com,Arts and Education,aimee@laglasscenter.com,3104629723.0,141 Penn Street,CA,El Segundo,90245.0,EMAIL
+Jim & Jack's Collision Center,http://www.jimandjacks.com,Auto Body Repair,taleen@jimandjacks.com,3103225733.0,1605 East Grand Ave.,CA,El Segundo,90245.0,EMAIL
+Jim & Jack's Collision Center,http://www.jimandjacks.com,Auto Body Repair,info@jimandjacks.com,3103225733.0,1605 East Grand Ave.,CA,El Segundo,90245.0,EMAIL
+South Bay Customs,http://www.southbaycustoms.net/,Automotive/Art/Music Venue,michael@southbaycustoms.net,3109821300.0,115 Penn Street,CA,El Segundo,90245.0,EMAIL
+"JALUX Americas, Inc.",https://www.am.jalux.com,Aviation Services,kentaro.kawaguchi@am.jalux.com,3105241033.0,"390 N. Pacific Coast Hwy, Suite 2000",CA,El Segundo,90245.0,EMAIL
