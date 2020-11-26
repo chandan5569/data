@@ -19,13 +19,9 @@ class Website(EmbeddedDocument):
     business_name = StringField(max_length=250, required=True)
     website_link = StringField(max_length=250, required=True)
     emails = ListField(EmailField(unique= True))
-    telephone = IntField(min_value=0)
-    # postal_code = IntField()
-    # state = StringField()
-    city = StringField()
-    keyword = StringField(max_length=250)
-    # Address_line2 = StringField()
-    # Address_line1 = StringField()
+    #telephone = IntField(min_value=0)
+    #city = StringField()
+    #keyword = StringField(max_length=250)
 
 class MB_scraper(Document):
     userid = StringField(max_length=120, required=True)
@@ -64,7 +60,7 @@ class Scraper:
         for links in bsobj.findAll("a", {"href": re.compile("^(/|.*" + includeurl + ")")}):
             if links.attrs['href'] is not None:
                 if links.attrs["href"] not in internalLinks:
-                    internalLinks.append(links.attrs['href'])# print(internalLinks)                    
+                    internalLinks.append(links.attrs['href'])                   
         
         for link in internalLinks:
              truncURL = link.replace("http://", "").replace("https://", "").replace(includeurl, "")
@@ -98,7 +94,7 @@ class Scraper:
 
     def create_db(self, collection, query):
         status = 'Scraping Started'
-        document = collection.find_one(query)#print(document)
+        document = collection.find_one(query)
         
         if document:
             return document
@@ -120,18 +116,20 @@ class Scraper:
         document = self.create_db(collection, query)
         if document:
             data_email = document["collection_of_email_scraped"]
-        #     print(data_email)
+            #print(data_email)
             dataframe = pd.DataFrame(data_email)
-        #     print(dataframe)
-            col = dataframe.business_name.to_list()
-        #     print(col)
-            self.all_websites = col
+            print(dataframe)
+            col1 = dataframe.business_name.to_list()
+            col2 = dataframe.website_link.to_list()
+            col3 = dataframe.emails.to_list()
+            #print(col1, col2, col3)
+            self.all_websites = col1
 
     def splitaddress(self,address):
         return (address.replace("http://", "").replace("https://", "").split("/"))
 
-    def get_telephone_no(self, telephone):
-        return int(re.sub(r'[^\w]', '', telephone))
+    #def get_telephone_no(self, telephone):
+        #return int(re.sub(r'[^\w]', '', telephone))
 
     def get_url(self, start=0):
         # https://www.yelp.com/search?find_desc=Therapist&find_loc=San+Francisco%2C+CA&ns=
@@ -150,7 +148,7 @@ class Scraper:
             chrome_options.add_argument("--headless")
             chrome_options.add_argument("--no-sandbox")
             chrome_options.add_argument("--disable-gpu")
-            # chrome_options.add_argument('--disable-dev-shm-usage')
+            #chrome_options.add_argument('--disable-dev-shm-usage')
             driver = webdriver.Chrome('/home/dhruv034/Desktop/codemarket/chromedriver_linux64/chromedriver',chrome_options=chrome_options)
             #driver = webdriver.Chrome('E:/Codes/chromedriver.exe')#,chrome_options=chrome_options)
             try:
@@ -187,13 +185,13 @@ class Scraper:
                             websitelink = None
                             # Extract business name from the business website
                             business_name = profile_soup.find('h1',class_ = "lemon--h1__373c0__2ZHSL heading--h1__373c0__dvYgw undefined heading--inline__373c0__10ozy").text
-                            print(business_name)
+                            #print(business_name)
                             
-                            telephone = 0
+                            #telephone = 0
                             
-                            if profile_soup.find("p", string="Phone number") != None:
-                                if profile_soup.find("p", string="Phone number").findNext('p') != None:
-                                        telephone = self.get_telephone_no(profile_soup.find("p", string="Phone number").findNext('p').text)
+                            #if profile_soup.find("p", string="Phone number") != None:
+                                #if profile_soup.find("p", string="Phone number").findNext('p') != None:
+                                        #telephone = self.get_telephone_no(profile_soup.find("p", string="Phone number").findNext('p').text)
                             
                             if profile_soup.find("p", string="Business website") != None:
                                 if profile_soup.find("p", string="Business website").findNext('p') != None:
@@ -201,24 +199,23 @@ class Scraper:
                                         websitelink = profile_soup.find("p", string="Business website").findNext('p').find('a')
 
                             if websitelink == None:
-                                # print("Link Not Found")
+                                print("Link Not Found")
                                 print("https://www.yelp.com/" + link['href'])
                                 continue
                             
                             if business_name == None:
                                 print("NO business Name")
                                 business_name = websitelink
-                            #print(business_name)
+                            print(business_name)
                             
                             if business_name in self.all_websites:
-                                # print("Website data already Available")
-                                #print(Website.business_name)
-                                #print(Website.website_link)
-                                #print(Website.emails)
-                                if telephone != 0:
-                                    MB_scraper.objects(userid = self.userid, name = self.name, collection_of_email_scraped__business_name = business_name).update(set__collection_of_email_scraped__S__telephone = telephone)
-                                if city != ' ':
-                                    MB_scraper.objects(userid = self.userid, name = self.name, collection_of_email_scraped__business_name = business_name).update(set__collection_of_email_scraped__S__city = city)
+                                print("Website data already Available")
+                                
+                                #if telephone != 0:
+                                    #MB_scraper.objects(userid = self.userid, name = self.name, collection_of_email_scraped__business_name = business_name).update(set__collection_of_email_scraped__S__telephone = telephone)
+                                #if city != ' ':
+                                    #MB_scraper.objects(userid = self.userid, name = self.name, collection_of_email_scraped__business_name = business_name).update(set__collection_of_email_scraped__S__city = city)
+                                    
                             else:
                                 self.all_websites.append(business_name)
                                 try:
@@ -243,6 +240,7 @@ class Scraper:
                                 self.AllInternalEmails.update(only_valid)
                                 self.getInternalLinks(websiteSoup, self.splitaddress(websitelink.text)[0])
                                 self.AllInternalLinks.clear()
+                                print(AllInternalEmails)
 
                                 website_object = Website()
                                 website_object.business_name = business_name
@@ -250,10 +248,10 @@ class Scraper:
                                 website_object.emails = list(self.AllInternalEmails)
                                 website_object.keyword = self.keyword
                                 
-                                if telephone != 0:
-                                    website_object.telephone = telephone
-                                if city != '':
-                                    website_object.city = city 
+                                #if telephone != 0:
+                                    #website_object.telephone = telephone
+                                #if city != '':
+                                    #website_object.city = city 
                                                            
                                 self.email_counter += len(self.AllInternalEmails)
                                 self.AllInternalEmails.clear()
@@ -281,7 +279,7 @@ if __name__ == '__main__':
     parser.add_argument('keyword',type=str,nargs='?',default=urllib.parse.quote_plus('Therapist'),help='Enter keyword')
     parser.add_argument('city',type=str,nargs='?',default=urllib.parse.quote_plus('Los Angeles, CA'),help='Enter city')
     parser.add_argument('start_limit',type=int,nargs='?',default=1, help='Enter limit')
-    parser.add_argument('end_limit',type=int,nargs='?',default=10, help='Enter limit')
+    parser.add_argument('end_limit',type=int,nargs='?',default=5, help='Enter limit')
     args = parser.parse_args()
 
     userid = args.userid
@@ -293,4 +291,4 @@ if __name__ == '__main__':
     print(userid, name, keyword, city, start_limit, end_limit)
 
     scraper_obj = Scraper(userid,name,keyword,city,start_limit, end_limit)
-    scraper_obj.scrape(MB_scraper)
+    #scraper_obj.scrape(MB_scraper)
