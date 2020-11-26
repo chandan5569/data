@@ -21,9 +21,9 @@ ENV DISPLAY=:99
 
 # Install requirements first so this step is cached by Docker
 COPY /requirements.txt /home/ubuntu/data/yelpscraper/requirements.txt
-COPY /scraper.py  /home/ubuntu/data/yelpscraper/scraper.py
+COPY /scrap_email.py  /home/ubuntu/data/yelpscraper/scrap_email.py
 WORKDIR /home/ubuntu/data/yelpscraper
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-ENTRYPOINT ["python","scraper.py"]
+ENTRYPOINT ["python3","scrap_email.py"]
