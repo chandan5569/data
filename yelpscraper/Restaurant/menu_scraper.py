@@ -50,35 +50,6 @@ class Scraper:
         except:
             print(f"{self.userid} has no data available for {self.name}")
 
-    def getInternalLinks(self,bsobj, includeurl):
-        internalLinks = []
-        for links in bsobj.findAll("a", {"href": re.compile("^(/|.*" + includeurl + ")")}):
-            if links.attrs['href'] is not None:
-                if links.attrs["href"] not in internalLinks:
-                    internalLinks.append(links.attrs['href'])                   
-        
-        for link in internalLinks:
-             truncURL = link.replace("http://", "").replace("https://", "").replace(includeurl, "")
-             sep = "/"
-             spliturl = truncURL.split(sep,2)
-             if len(spliturl)>=2:
-                 truncURL = spliturl[1] 
-                 removeParameterURL = spliturl[1].split("?", 1)
-                 if len(removeParameterURL) >=1:
-                     truncURL = removeParameterURL[0]
-                 else:
-                     truncURL = ""
-             if truncURL not in self.AllInternalLinks:
-                 if link != "http://"+includeurl and link != "https://"+includeurl and link != '/' and link != "http://"+includeurl+'/' and link != "https://"+includeurl+'/':
-                    self.AllInternalLinks.add(truncURL)
-                    try:
-                        websitepage = get("http://"+includeurl+"/" + truncURL)
-                    except:
-                        continue
-                    websitepage_soup = BeautifulSoup(websitepage.text, 'html.parser')
-                    self.getInternalLinks(websitepage_soup,includeurl)
-        return (internalLinks)
-
     def create_db(self, collection, query):
         status = 'Scraping Started'
         document = collection.find_one(query)
@@ -110,9 +81,6 @@ class Scraper:
             col2 = dataframe.website_link.to_list()
             # print(col1, col2,)
             self.all_websites = col1
-
-    def splitaddress(self,address):
-        return (address.replace("http://", "").replace("https://", "").split("/"))
 
     def get_url(self, start=0):
         # https://www.yelp.com/search?find_desc=Therapist&find_loc=San+Francisco%2C+CA&ns=
@@ -202,7 +170,12 @@ class Scraper:
                                 # Find menu in the webpage
                                 websitepage = driver.page_source
                                 websiteSoup = BeautifulSoup(websitepage, 'html.parser')
-                                print(websiteSoup)
+                                # print(websiteSoup)
+                                menu_link = site_url + "/menu.html"
+                                driver.get(menu_link)
+                                menu_page = driver.page_source
+                                menu_soup = BeautifulSoup(menu_page, 'html.parser')
+                                print(menu_soup)
                                 # self.getInternalLinks(websiteSoup, self.splitaddress(websitelink.text)[0])
                                 # self.AllInternalLinks.clear()
 
