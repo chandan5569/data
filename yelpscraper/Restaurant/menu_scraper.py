@@ -13,7 +13,6 @@ import argparse
 import datetime
 from sys import stdout
 import pandas as pd
-from validate_email import validate_email
 
 class Website(EmbeddedDocument):
     business_name = StringField(max_length=250, required=True)
@@ -26,11 +25,10 @@ class Menu_scraper(Document):
     status = StringField(max_length=120)
     city = StringField(max_length=250)
     keywords = ListField(StringField(max_length=250))
-    # email_counter = IntField()
     limit = StringField()
     created_timestamp = DateTimeField()
     last_updated = DateTimeField()
-    # collection_of_email_scraped = EmbeddedDocumentListField(Website)
+    # collection_of_menu_scraped = EmbeddedDocumentListField(Website)
 
 class Scraper:
     def __init__(self,userid,name,keyword,city,start_limit, end_limit):
@@ -83,7 +81,7 @@ class Scraper:
             self.all_websites = col1
 
     def get_url(self, start=0):
-        # https://www.yelp.com/search?find_desc=Therapist&find_loc=San+Francisco%2C+CA&ns=
+        # https://www.yelp.com/search?find_desc=Indian+food&find_loc=Redondo+Beach%2C+CA&ns=
         desc = self.keyword
         loc = self.city
         url = f'https://www.yelp.com/search?find_desc={desc}&find_loc={loc}&ns=1&start={start}'
@@ -91,7 +89,6 @@ class Scraper:
 
     def scrape(self, Menu_scraper):
         self.flag = 0
-        # self.no_email = True
         print('Begin Scraping')
         connect(db = 'codemarket_shiraz', host = 'mongodb+srv://sumi:'+urllib.parse.quote_plus('sumi@123')+'@codemarket-staging.k16z7.mongodb.net/codemarket_shiraz?retryWrites=true&w=majority')
         while self.flag < 10:
@@ -121,7 +118,6 @@ class Scraper:
                         lilist = bussiness_list.findChildren(['li'])
                         for li in lilist:
                             status = 'Scraping website'
-                            # self.email_counter = 0
                             Menu_scraper.objects(userid = self.userid, name = self.name).update(set__status = status)
                             # Find the link of the business
                             link = li.find('a',class_="link__09f24__1kwXV link-color--inherit__09f24__3PYlA link-size--inherit__09f24__2Uj95")
@@ -176,8 +172,6 @@ class Scraper:
                                 menu_page = driver.page_source
                                 menu_soup = BeautifulSoup(menu_page, 'html.parser')
                                 print(menu_soup)
-                                # self.getInternalLinks(websiteSoup, self.splitaddress(websitelink.text)[0])
-                                # self.AllInternalLinks.clear()
 
                                 website_object = Website()
                                 website_object.business_name = business_name
@@ -185,8 +179,8 @@ class Scraper:
                                 website_object.keyword = self.keyword
                                 
                                 try:
-                                    # Menu_scraper.objects(userid = self.userid, name = self.name).update(push__collection_of_menu_scraped = website_object)
-                                    # Menu_scraper.objects(userid = self.userid, name = self.name).update(inc__menu_counter = self.menu_counter)
+                                    Menu_scraper.objects(userid = self.userid, name = self.name).update(push__collection_of_menu_scraped = website_object)
+                                    Menu_scraper.objects(userid = self.userid, name = self.name).update(inc__menu_counter = self.menu_counter)
                                     Menu_scraper.objects(userid = self.userid, name = self.name).update(set__last_updated = datetime.datetime.now())
                                 except:
                                     print("Not Unique Data")
