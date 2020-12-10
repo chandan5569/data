@@ -13,7 +13,6 @@ import argparse
 import datetime
 from sys import stdout
 import pandas as pd
-from validate_email import validate_email
 
 class Website(EmbeddedDocument):
     business_name = StringField(max_length=250, required=True)
@@ -26,11 +25,9 @@ class Menu_scraper(Document):
     status = StringField(max_length=120)
     city = StringField(max_length=250)
     keywords = ListField(StringField(max_length=250))
-    # email_counter = IntField()
-    limit = StringField()
     created_timestamp = DateTimeField()
     last_updated = DateTimeField()
-    # collection_of_email_scraped = EmbeddedDocumentListField(Website)
+    # collection_of_menu_scraped = EmbeddedDocumentListField(Website)
 
 class Scraper:
     def __init__(self,userid,name,keyword,city,start_limit, end_limit):
@@ -41,8 +38,6 @@ class Scraper:
         self.city = city
         self.start_limit = start_limit
         self.end_limit = end_limit
-        self.counter = 0
-        self.AllInternalLinks = set()
         self.all_websites = []
         self.final_result = set()
         try:
@@ -61,7 +56,6 @@ class Scraper:
                         'name':self.name,
                         'keywords':[self.keyword],
                         'city':self.city,
-                        'limit':f"{self.start_limit} - {self.end_limit}",
                         'status': status
                     }
             collection.insert_one(document)
@@ -91,7 +85,6 @@ class Scraper:
 
     def scrape(self, Menu_scraper):
         self.flag = 0
-        # self.no_email = True
         print('Begin Scraping')
         connect(db = 'codemarket_shiraz', host = 'mongodb+srv://sumi:'+urllib.parse.quote_plus('sumi@123')+'@codemarket-staging.k16z7.mongodb.net/codemarket_shiraz?retryWrites=true&w=majority')
         while self.flag < 10:
@@ -115,81 +108,13 @@ class Scraper:
                         driver.get(url)
                         html = driver.page_source
                         soup = BeautifulSoup(html, 'html.parser')
-                        # Find the business list from the searched url 
+                        # Find the business(Restaurant) list from the searched url 
                         bussiness_list = soup.find('ul',class_="undefined list__09f24__17TsU")
 
                         lilist = bussiness_list.findChildren(['li'])
                         for li in lilist:
                             status = 'Scraping website'
-                            # self.email_counter = 0
                             Menu_scraper.objects(userid = self.userid, name = self.name).update(set__status = status)
-                            # Find the link of the business
-                            link = li.find('a',class_="link__09f24__1kwXV link-color--inherit__09f24__3PYlA link-size--inherit__09f24__2Uj95")
-                            #print(link)
-
-                            if link == None:
-                                continue
-                        
-                            driver.get("https://www.yelp.com/" + link['href'])
-                            time.sleep(3)
-                            profile = driver.page_source
-                            profile_soup = BeautifulSoup(profile, 'html.parser')
-                            websitelink = None
-                            # Extract business name from the business website
-                            business_name = profile_soup.find('h1',class_ = "lemon--h1__373c0__2ZHSL heading--h1__373c0__dvYgw undefined heading--inline__373c0__10ozy").text
-                            #print(business_name)
-                            
-                            
-                            if profile_soup.find("p", string="Business website") != None:
-                                if profile_soup.find("p", string="Business website").findNext('p') != None:
-                                    if profile_soup.find("p", string="Business website").findNext('p').find('a') != None:
-                                        websitelink = profile_soup.find("p", string="Business website").findNext('p').find('a')
-
-                            if websitelink == None:
-                                #print("Link Not Found")
-                                print("https://www.yelp.com/" + link['href'])
-                                continue
-                            
-                            if business_name == None:
-                                print("NO business Name")
-                                business_name = websitelink
-                            print(business_name)
-                            
-                            if business_name in self.all_websites:
-                                print("Website data already Available")                                    
-                            else:
-                                self.all_websites.append(business_name)
-                                try:
-                                    driver.get("http://"+websitelink.text)
-                                except:
-                                    print("An exception occurred")
-                                    continue
-                                time.sleep(5)
-                                site_url = "http://"+websitelink.text
-                                print(site_url)
-                                # Find menu in the webpage
-                                websitepage = driver.page_source
-                                websiteSoup = BeautifulSoup(websitepage, 'html.parser')
-                                # print(websiteSoup)
-                                menu_link = site_url + "/menu.html"
-                                driver.get(menu_link)
-                                menu_page = driver.page_source
-                                menu_soup = BeautifulSoup(menu_page, 'html.parser')
-                                print(menu_soup)
-                                # self.getInternalLinks(websiteSoup, self.splitaddress(websitelink.text)[0])
-                                # self.AllInternalLinks.clear()
-
-                                website_object = Website()
-                                website_object.business_name = business_name
-                                website_object.website_link = site_url
-                                website_object.keyword = self.keyword
-                                
-                                try:
-                                    # Menu_scraper.objects(userid = self.userid, name = self.name).update(push__collection_of_menu_scraped = website_object)
-                                    # Menu_scraper.objects(userid = self.userid, name = self.name).update(inc__menu_counter = self.menu_counter)
-                                    Menu_scraper.objects(userid = self.userid, name = self.name).update(set__last_updated = datetime.datetime.now())
-                                except:
-                                    print("Not Unique Data")
 
                     
                     Menu_scraper.objects(userid = self.userid, name = self.name).update(set__status = "Scraping Completed")
@@ -205,9 +130,7 @@ if __name__ == '__main__':
     parser.add_argument('userid',type=str,nargs='?',default='shiraz',help='Enter userid')
     parser.add_argument('name',type=str,nargs='?',default='menu_scraper',help='Enter name')
     parser.add_argument('keyword',type=str,nargs='?',default=urllib.parse.quote_plus('Indian Food'),help='Enter keyword')
-    parser.add_argument('city',type=str,nargs='?',default=urllib.parse.quote_plus('Rodento Beach, CA'),help='Enter city')
-    parser.add_argument('start_limit',type=int,nargs='?',default=1, help='Enter limit')
-    parser.add_argument('end_limit',type=int,nargs='?',default=5, help='Enter limit')
+    parser.add_argument('city',type=str,nargs='?',default=urllib.parse.quote_plus('Redondo Beach, CA'),help='Enter city')
     args = parser.parse_args()
 
     userid = args.userid
