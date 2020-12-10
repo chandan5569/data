@@ -25,6 +25,10 @@ class Menu_scraper(Document):
     status = StringField(max_length=120)
     city = StringField(max_length=250)
     keywords = ListField(StringField(max_length=250))
+<<<<<<< HEAD
+=======
+    limit = StringField()
+>>>>>>> de54aa7b1cce75473baf17785d8efecf4432e05d
     created_timestamp = DateTimeField()
     last_updated = DateTimeField()
     # collection_of_menu_scraped = EmbeddedDocumentListField(Website)
@@ -77,7 +81,7 @@ class Scraper:
             self.all_websites = col1
 
     def get_url(self, start=0):
-        # https://www.yelp.com/search?find_desc=Therapist&find_loc=San+Francisco%2C+CA&ns=
+        # https://www.yelp.com/search?find_desc=Indian+food&find_loc=Redondo+Beach%2C+CA&ns=
         desc = self.keyword
         loc = self.city
         url = f'https://www.yelp.com/search?find_desc={desc}&find_loc={loc}&ns=1&start={start}'
@@ -115,6 +119,74 @@ class Scraper:
                         for li in lilist:
                             status = 'Scraping website'
                             Menu_scraper.objects(userid = self.userid, name = self.name).update(set__status = status)
+<<<<<<< HEAD
+=======
+                            # Find the link of the business
+                            link = li.find('a',class_="link__09f24__1kwXV link-color--inherit__09f24__3PYlA link-size--inherit__09f24__2Uj95")
+                            #print(link)
+
+                            if link == None:
+                                continue
+                        
+                            driver.get("https://www.yelp.com/" + link['href'])
+                            time.sleep(3)
+                            profile = driver.page_source
+                            profile_soup = BeautifulSoup(profile, 'html.parser')
+                            websitelink = None
+                            # Extract business name from the business website
+                            business_name = profile_soup.find('h1',class_ = "lemon--h1__373c0__2ZHSL heading--h1__373c0__dvYgw undefined heading--inline__373c0__10ozy").text
+                            #print(business_name)
+                            
+                            
+                            if profile_soup.find("p", string="Business website") != None:
+                                if profile_soup.find("p", string="Business website").findNext('p') != None:
+                                    if profile_soup.find("p", string="Business website").findNext('p').find('a') != None:
+                                        websitelink = profile_soup.find("p", string="Business website").findNext('p').find('a')
+
+                            if websitelink == None:
+                                #print("Link Not Found")
+                                print("https://www.yelp.com/" + link['href'])
+                                continue
+                            
+                            if business_name == None:
+                                print("NO business Name")
+                                business_name = websitelink
+                            print(business_name)
+                            
+                            if business_name in self.all_websites:
+                                print("Website data already Available")                                    
+                            else:
+                                self.all_websites.append(business_name)
+                                try:
+                                    driver.get("http://"+websitelink.text)
+                                except:
+                                    print("An exception occurred")
+                                    continue
+                                time.sleep(5)
+                                site_url = "http://"+websitelink.text
+                                print(site_url)
+                                # Find menu in the webpage
+                                websitepage = driver.page_source
+                                websiteSoup = BeautifulSoup(websitepage, 'html.parser')
+                                # print(websiteSoup)
+                                menu_link = site_url + "/menu.html"
+                                driver.get(menu_link)
+                                menu_page = driver.page_source
+                                menu_soup = BeautifulSoup(menu_page, 'html.parser')
+                                print(menu_soup)
+
+                                website_object = Website()
+                                website_object.business_name = business_name
+                                website_object.website_link = site_url
+                                website_object.keyword = self.keyword
+                                
+                                try:
+                                    Menu_scraper.objects(userid = self.userid, name = self.name).update(push__collection_of_menu_scraped = website_object)
+                                    Menu_scraper.objects(userid = self.userid, name = self.name).update(inc__menu_counter = self.menu_counter)
+                                    Menu_scraper.objects(userid = self.userid, name = self.name).update(set__last_updated = datetime.datetime.now())
+                                except:
+                                    print("Not Unique Data")
+>>>>>>> de54aa7b1cce75473baf17785d8efecf4432e05d
 
                     
                     Menu_scraper.objects(userid = self.userid, name = self.name).update(set__status = "Scraping Completed")
