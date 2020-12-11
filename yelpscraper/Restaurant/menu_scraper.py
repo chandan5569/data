@@ -7,6 +7,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 import pymongo
 from mongoengine import *
 from mongoengine.context_managers import switch_collection
@@ -89,7 +90,7 @@ class Scraper:
         connect(db = 'codemarket_shiraz', host = 'mongodb+srv://sumi:'+urllib.parse.quote_plus('sumi@123')+'@codemarket-staging.k16z7.mongodb.net/codemarket_shiraz?retryWrites=true&w=majority')
         while self.flag < 10:
             chrome_options = Options()
-            # chrome_options.add_argument("--headless")
+            chrome_options.add_argument("--headless")
             chrome_options.add_argument("--no-sandbox")
             chrome_options.add_argument("--disable-gpu")
             chrome_options.add_argument('--disable-dev-shm-usage')
@@ -109,15 +110,35 @@ class Scraper:
                         html = driver.page_source
                         soup = BeautifulSoup(html, 'html.parser')
                         # Find the business(Restaurant) list from the searched url 
-                        # rest_list = soup.find('ul',class_="undefined list__09f24__17TsU")
-                        wait.until(lambda driver: driver.find_element_by_link_text('Start Order')).click()
-                        # lilist = rest_list.findChildren(['li'])
-                        # for li in lilist:
+                        rest_list = soup.find('ul',class_="undefined list__09f24__17TsU")
+                        lilist = rest_list.findChildren(['li'])
+                        for li in lilist:
+                            link = li.find('a',class_="link__09f24__1kwXV link-color--inherit__09f24__3PYlA link-size--inherit__09f24__2Uj95")
+                            if link == None:
+                                continue
+                            driver.get("https://yelp.com/" + link['href'])
+                            rest_page = driver.page_source
+                            rest_soup = BeautifulSoup(rest_page, 'html.parser')
+                            rest_name = rest_soup.find('h1',class_ = "lemon--h1__373c0__2ZHSL heading--h1__373c0__dvYgw undefined heading--inline__373c0__10ozy").text
+                            print(rest_name)
 
-                            # wait.until(lambda driver: driver.find_element_by_link_text('Start Order')).click()
-                            # status = 'Scraping website'
-                            # Menu_scraper.objects(userid = self.userid, name = self.name).update(set__status = status)
-                            
+                            # Click on the Takeout tab
+                            tab = wait.until(EC.element_to_be_clickable((
+                                By.XPATH, '//div[@class="lemon--div__373c0__1mboc tab__373c0__24QGW tabNavItem__373c0__3X-YR tab--section__373c0__3V0A9 tab--no-outline__373c0__3adQG"]'
+                            )))
+                            tab.click()
+                            # Click on the Start Order button
+                            order = wait.until(EC.element_to_be_clickable((
+                                By.XPATH, '//button[@class="button__373c0__3lYgT primary__373c0__2ZWOb full__373c0__1AgIz"]'
+                            )))
+                            order.click()
+                            status = 'Scraping website'
+                            Menu_scraper.objects(userid = self.userid, name = self.name).update(set__status = status)
+                            time.sleep(3)
+                            menu_link = driver.current_url
+                            menu_page = driver.page_source
+                            menu_soup = BeautifulSoup(menu_page, 'html.parser')
+                            print("Parsed cart page")
                     
                     Menu_scraper.objects(userid = self.userid, name = self.name).update(set__status = "Scraping Completed")
                     break
