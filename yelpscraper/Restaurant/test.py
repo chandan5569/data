@@ -40,9 +40,9 @@ for li in lilist:
     #     lambda driver: driver.find_element_by_class_name('lemon--div__373c0__1mboc tabLabel__373c0__2-upa')
     # ).click()
     rest = driver.page_source
-    # rest_soup = BeautifulSoup(rest, 'html.parser')
-    # rest_name = rest_soup.find('h1',class_ = "lemon--h1__373c0__2ZHSL heading--h1__373c0__dvYgw undefined heading--inline__373c0__10ozy").text
-    # print(rest_name)
+    rest_soup = BeautifulSoup(rest, 'html.parser')
+    rest_name = rest_soup.find('h1',class_ = "lemon--h1__373c0__2ZHSL heading--h1__373c0__dvYgw undefined heading--inline__373c0__10ozy").text
+    print(rest_name)
     tab = wait.until(EC.element_to_be_clickable((
         By.XPATH, '//div[@class="lemon--div__373c0__1mboc tab__373c0__24QGW tabNavItem__373c0__3X-YR tab--section__373c0__3V0A9 tab--no-outline__373c0__3adQG"]'
     )))
@@ -55,15 +55,22 @@ for li in lilist:
     #     lambda driver: driver.find_element_by_link_text("Start Order")
     # ).click()
 
-# menu_link = ""
-# driver.get(menu_link)
-# menu_page = driver.page_source
-# menu_soup = BeautifulSoup(menu_page, 'html.parser')
-# print(menu_soup)
+    time.sleep(10)
+    menu_link = driver.current_url
+    driver.get(menu_link)
+    menu_page = driver.page_source
+    menu_soup = BeautifulSoup(menu_page, 'html.parser')
+    # print(menu_soup)
+    # menu = menu_soup.find('a',class_="lemon--a__85e3c__IEZFH link__85e3c__29943 link-color--blue-dark__85e3c__1mhJo link-size--default__85e3c__1skgq").text
+    # print(menu + "Menu")
+    # menu_list = menu_soup.find('div',class_="lemon--div__85e3c__1mboc menu-item-wrapper__85e3c__2jk74 u-sm-space-t0 u-sm-space-b0 border-color--default__85e3c__2oFDT")
+    # list_menu = menu_list.findChildren(['p'])
+    # print(list_menu)
 
-#Filter menu data
-# list_menu = menu_soup.find('h2',class_="lemon--h2__85e3c__hjA2W heading--h2__85e3c__1TQtb alternate__85e3c__1uacp")
-# list_menu = menu_list.findChildren['li']
-# print(list_menu.find('h4').text)
-# print(list_menu)
-# 
+    lm = []
+    for data in menu_soup:
+        dataframe = {}
+        # dataframe["item_name"] = data.find('p',class_="lemon--p__85e3c__3Qnnj text__85e3c__2pB8f name__85e3c__1xq7V text-color--normal__85e3c__K_MKN text-align--left__85e3c__2pnx_").text
+        dataframe["price"] = data.find('p',class_="lemon--p__85e3c__3Qnnj text__85e3c__2pB8f price__85e3c__33BRs text-color--normal__85e3c__K_MKN text-align--left__85e3c__2pnx_ text-weight--bold__85e3c__3HYJa").text
+        lm.append(dataframe)
+    print(lm)
