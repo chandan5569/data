@@ -7,6 +7,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 import pandas as pd
 import time
+import pymongo
+import urllib.parse
 
 chrome_options = Options()
 chrome_options.add_argument("--headless")
@@ -23,27 +25,29 @@ html = driver.page_source
 soup = BeautifulSoup(html, 'html.parser')
 
 column_div = soup.find('div',class_="column column-alpha")
-menu_header = column_div.find('h1').text
+menu_header_unstrip = column_div.find('h1').text
+menu_header = menu_header_unstrip.strip()
 print(menu_header)
 
 menu_sections = soup.find('div',class_="menu-sections")
 # print(menu-sections)
-
-# section_header = menu_sections.findChildren(['h2'])
-# for h2 in section_header:
-#     print(h2.text)
-item_list = list()
-price_list = list()
-
+menu=[]
 menu_item = menu_sections.findChildren(['h4'])
-for h4 in menu_item:
-    item = h4.text
-    item_list.append(item.strip())
-
 menu_item_price = menu_sections.findChildren(['li'])
-for li in menu_item_price:
+for (h4, li) in zip(menu_item, menu_item_price):
+    dataframe = {}
+    item = h4.text
+    dataframe['item-name'] = item.strip()
     price = li.text
-    price_list.append(price.strip())
+    dataframe['item-price'] = price.strip()
+    menu.append(dataframe)
 
-menu = zip(item_list,price_list)
-print(dict(menu))
+# print(menu)
+client = pymongo.MongoClient('mongodb+srv://sumi:'+urllib.parse.quote_plus('sumi@123')+'@codemarket-staging.k16z7.mongodb.net/codemarket_shiraz?retryWrites=true&w=majority')
+db = client.codemarket_shiraz.menu
+try:
+    # db.insert_one(menu_header)
+    db.insert_many(menu)
+    print("Menu data inserted")
+except:
+    print("An error occured while storing menu data.")
