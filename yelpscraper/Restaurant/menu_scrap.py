@@ -37,14 +37,14 @@ menu_item_price = menu_sections.findChildren(['li'])
 for (h4, li) in zip(menu_item, menu_item_price):
     dataframe = {}
     item = h4.text
-    dataframe['item-name'] = item.strip()
+    dataframe['itemName'] = item.strip()
     price = li.text
-    dataframe['item-price'] = price.strip()
+    dataframe['itemPrice'] = price.strip()
     menu.append(dataframe)
 
 # print(menu)
-client = pymongo.MongoClient('mongodb+srv://sumi:'+urllib.parse.quote_plus('sumi@123')+'@codemarket-staging.k16z7.mongodb.net/codemarket_shiraz?retryWrites=true&w=majority')
-db = client.codemarket_shiraz.menu
+client = pymongo.MongoClient('mongodb+srv://shiraza:'+urllib.parse.quote_plus('Codemarket.123')+'@codemarket-staging.k16z7.mongodb.net/codemarket_shiraz?retryWrites=true&w=majority')
+db = client.codemarket_shiraz.menu_data
 try:
     # db.insert_one(menu_header)
     db.insert_many(menu)
