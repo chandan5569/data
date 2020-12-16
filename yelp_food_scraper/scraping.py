@@ -1,20 +1,43 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[41]:
+# In[1]:
 
 
 from bs4 import BeautifulSoup
 import requests
 import pandas as pd
+import pymongo
+import urllib.parse
+import dns
+from mongoengine import *
+from mongoengine.context_managers import switch_collection
 
 
-# In[45]:
+# In[43]:
+
+
+get_ipython().system('pip install mongoengine')
+
+
+# In[5]:
+
+
+client = pymongo.MongoClient('mongodb+srv://bilalm:'+urllib.parse.quote_plus('Codemarket.123')+'@codemarket-staging.k16z7.mongodb.net/dreamjobpal?retryWrites=true&w=majority')
+my_db = client['dreamjobpal']
+db = my_db.hotel_menu
+
+
+# In[7]:
 
 
 def hotel_menu():
     item = input("Please enter the name of food item:")
     place = input("Please enter the location:")
+    
+    client = pymongo.MongoClient('mongodb+srv://bilalm:'+urllib.parse.quote_plus('Codemarket.123')+'@codemarket-staging.k16z7.mongodb.net/dreamjobpal?retryWrites=true&w=majority')
+    my_db = client['dreamjobpal']
+    db = my_db.hotel_menu
     
     data = []
     for page in range (0, 10, 10):
@@ -56,13 +79,13 @@ def hotel_menu():
                     else:
                         price_result=price_result.text.strip()
                     data.append({"hotel":hotel_name,"item":name_result,"price":price_result})
-
+                    db.insert({"hotel":hotel_name,"item":name_result,"price":price_result})
     print(data)
     dataset = pd.DataFrame(data)
     dataset.to_csv(item+'.csv')
 
 
-# In[47]:
+# In[8]:
 
 
 hotel_menu()
