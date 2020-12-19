@@ -9,10 +9,10 @@ import datetime
 import pandas as pd
 
 class Website(EmbeddedDocument):
-    restaurant_name = StringField(max_length=250, required=True)
+    restaurantName = StringField(max_length=250, required=True)
     city = StringField()
     keyword = StringField(max_length=250)
-    menu_data = DictField()
+    menuData = DictField()
 
 class Menu_scraper(Document):
     userid = StringField(max_length=120, required=True)
@@ -21,18 +21,18 @@ class Menu_scraper(Document):
     city = ListField(StringField(max_length=250))
     keywords = ListField(StringField(max_length=250))
     created_timestamp = DateTimeField()
-    last_updated = DateTimeField()
-    collection_of_menu_scraped = EmbeddedDocumentListField(Website)
+    lastUpdated = DateTimeField()
+    collectionOfMenuScraped = EmbeddedDocumentListField(Website)
 
 class Scraper:
     def __init__(self,userid,name,keyword,city):
         self.userid = userid
         self.name = name
         self.keyword = keyword
-        self.collections = "Menu"
+        self.collections = "MenuData"
         self.city = city
         self.all_websites = []
-        self.menu_data = {}
+        self.menuData = {}
         self.final_result = set()
         try:
             self.get_scraped_data()
@@ -62,11 +62,11 @@ class Scraper:
         collection = db[self.collections]
         document = self.create_db(collection, query)
         if document:
-            data_menu = document["collection_of_menu_scraped"]
+            data_menu = document["collectionOfMenuScraped"]
             # print(data_menu)
             dataframe = pd.DataFrame(data_menu)
             # print(dataframe)
-            col = dataframe.restaurant_name.to_list()
+            col = dataframe.restaurantName.to_list()
             self.all_websites = col
             
     # Generate a url for given search
@@ -83,7 +83,7 @@ class Scraper:
         with switch_collection(Menu_scraper, self.collections) as Menu_scraper:
             menu_dict={}
             data = []
-            for start in range (0, 10, 10):
+            for start in range (0, 20, 10):
                 Menu_scraper.objects(userid = self.userid, name = self.name).update(push__keywords = self.keyword)
                 url = self.get_url(start)
                 source = requests.get(url).text
@@ -102,56 +102,58 @@ class Scraper:
                         menu_soup = BeautifulSoup(menu_url, 'html.parser')
 
                         # Find restaurant name
-                        restaurantName = menu_soup.find('h1')
-                        if restaurantName == None:
+                        rest_name = menu_soup.find('h1')
+                        if rest_name == None:
                             continue
-                        restaurantName = restaurantName.text.strip()
-                        restaurantName = restaurantName.strip("Menu for ")
-                        # print(restaurantName)
-                        
-                        # Find Category list like Appetizers, salads etc 
-                        category_list = []
-                        for j in menu_soup.find_all('div',{"class":"section-header"}):
-                            category = j.find('h2')
-                            c = category.text.strip()
-                            category_list.append(c)
-                        # print(category_list)
+                        rest_name = rest_name.text.strip()
+                        rest_name = rest_name.strip("Menu for ")
+                        # print(rest_name)
 
-                        # Scrap menu-item and menu-item-price for each category
-                        menu = {}
-                        count = 0
-                        for j in menu_soup.find_all('div', {"class": "u-space-b3"}):
-                            menu_item = []
-                            menu_item_price = []
-                            for i in j.find_all('div', {"class": "menu-item"}):
-                                menu_item_name = i.find('h4')
-                                menu_item_name = menu_item_name.text.strip()
-                                menu_item.append(menu_item_name)
-                                item_price = i.find('div',{"class": "menu-item-prices"})
-                                item_price = item_price.text.strip()
-                                menu_item_price.append(item_price)
+                        if rest_name in self.all_websites:
+                            print(rest_name +" data already available. ")
+                        else: 
+                            self.all_websites.append(rest_name)
 
-                            data = {'itemName': menu_item, 'itemPrice':menu_item_price}
-                            df = pd.DataFrame(data=data)
-                            menu[category_list[count]] = df.to_dict("records")
-                            count += 1
-                            if count == len(category_list):
-                                break
+                            # Find Category list like Appetizers, salads etc 
+                            category_list = []
+                            for j in menu_soup.find_all('div',{"class":"section-header"}):
+                                category = j.find('h2')
+                                c = category.text.strip()
+                                category_list.append(c)
+                            # print(category_list)
 
+                            # Scrap menu-item and menu-item-price for each category
+                            menu = {}
+                            count = 0
+                            for j in menu_soup.find_all('div', {"class": "u-space-b3"}):
+                                menu_item = []
+                                menu_item_price = []
+                                for i in j.find_all('div', {"class": "menu-item"}):
+                                    menu_item_name = i.find('h4')
+                                    menu_item_name = menu_item_name.text.strip()
+                                    menu_item.append(menu_item_name)
+                                    item_price = i.find('div',{"class": "menu-item-prices"})
+                                    item_price = item_price.text.strip()
+                                    menu_item_price.append(item_price)
 
+                                data = {'itemName': menu_item, 'itemPrice':menu_item_price}
+                                df = pd.DataFrame(data=data)
+                                menu[category_list[count]] = df.to_dict("records")
+                                count += 1
+                                if count == len(category_list):
+                                    break
 
-                        website_object = Website()
-                        website_object.restaurant_name = restaurantName
-                        # website_object.keyword = self.keyword
-                        # website_object.city = self.city
-                        website_object.menu_data = menu
+                            website_object = Website()
+                            website_object.restaurantName = rest_name
+                            website_object.menuData = menu
+                            website_object.keyword = self.keyword
+                            website_object.city = self.city
 
-                        try:
-                            Menu_scraper.objects(userid = self.userid, name = self.name).update(push__collection_of_menu_scraped = website_object)
-                            Menu_scraper.objects(userid = self.userid, name = self.name).update(set__last_updated = datetime.datetime.now())
-                        except:
-                            print("Not Unique data")
-            
+                            try:
+                                Menu_scraper.objects(userid = self.userid, name = self.name).update(push__collectionOfMenuScraped = website_object)
+                                Menu_scraper.objects(userid = self.userid, name = self.name).update(set__lastUpdated = datetime.datetime.now())
+                            except:
+                                print("Not Unique data")            
 
         Menu_scraper.objects(userid = self.userid, name = self.name).update(set__status = "Scraping Completed")
                    
