@@ -39,6 +39,7 @@ class Scraper:
         except:
             print(f"{self.userid} has no data available for {self.name}")
 
+    # Creating a document in mongodb
     def create_db(self, collection, query):
         status = 'Scraping Started'
         document = collection.find_one(query)
@@ -68,7 +69,7 @@ class Scraper:
             col = dataframe.restaurant_name.to_list()
             self.all_websites = col
             
-
+    # Generate a url for given search
     def get_url(self, start=0):
         # https://www.yelp.com/search?find_desc=Indian+Food&find_loc=Redondo+Beach%2C+CA&ns=1&start={start}
         desc = self.keyword
@@ -141,8 +142,8 @@ class Scraper:
 
                         website_object = Website()
                         website_object.restaurant_name = restaurantName
-                                    # website_object.keyword = self.keyword
-                                    # website_object.city = self.city
+                        # website_object.keyword = self.keyword
+                        # website_object.city = self.city
                         website_object.menu_data = menu
 
                         try:
