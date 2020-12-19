@@ -29,55 +29,35 @@ restaurantName = restaurantName.text.strip()
 restaurantName = restaurantName.strip("Menu for ")
 print(restaurantName)
 
-# category_list = []
-# for j in soup.find_all('div',{"class":"section-header"}):
-#     category = j.find('h2')
-#     c = category.text.strip()
-#     category_list.append(c)
+category_list = []
+for j in soup.find_all('div',{"class":"section-header"}):
+    category = j.find('h2')
+    c = category.text.strip()
+    category_list.append(c)
 # # print(category_list)
 
-# menu = {}
-# count = 0
-# for j in soup.find_all('div', {"class": "u-space-b3"}):
-#     menu_item = []
-#     menu_item_price = []
-#     for i in j.find_all('div', {"class": "menu-item"}):
-#         menu_item_name = i.find('h4')
-#         menu_item_name = menu_item_name.text.strip()
-#         menu_item.append(menu_item_name)
-#         item_price = i.find('div',{"class": "menu-item-prices"})
-#         item_price = item_price.text.strip()
-#         menu_item_price.append(item_price)
+menu = {}
+count = 0
+for j in soup.find_all('div', {"class": "u-space-b3"}):
+    menu_item = []
+    menu_item_price = []
+    for i in j.find_all('div', {"class": "menu-item"}):
+        menu_item_name = i.find('h4')
+        menu_item_name = menu_item_name.text.strip()
+        menu_item.append(menu_item_name)
+        item_price = i.find('div',{"class": "menu-item-prices"})
+        item_price = item_price.text.strip()
+        menu_item_price.append(item_price)
 
-#     data = {'itemName': menu_item, 'itemPrice':menu_item_price}
-#     df = pd.DataFrame(data=data)
-#     menu[category_list[count]] = df.to_dict("records")
-#     count += 1
-#     if count == len(category_list):
-#         break
-
-# print(menu)
-
-
-# column_div = soup.find('div',class_="column column-alpha")
-# menu_header_unstrip = column_div.find('h1').text
-# menu_header = menu_header_unstrip.strip()
-# print(menu_header)
-
-# menu_sections = soup.find('div',class_="menu-sections")
-# # print(menu-sections)
-# menu=[]
-# menu_item = menu_sections.findChildren(['h4'])
-# menu_item_price = menu_sections.findChildren(['li'])
-# for (h4, li) in zip(menu_item, menu_item_price):
-#     dataframe = {}
-#     item = h4.text
-#     dataframe['itemName'] = item.strip()
-#     price = li.text
-#     dataframe['itemPrice'] = price.strip()
-#     menu.append(dataframe)
+    data = {'itemName': menu_item, 'itemPrice':menu_item_price}
+    df = pd.DataFrame(data=data)
+    menu[category_list[count]] = df.to_dict("records")
+    count += 1
+    if count == len(category_list):
+        break
 
 # print(menu)
+
 # client = pymongo.MongoClient('mongodb+srv://shiraza:'+urllib.parse.quote_plus('Codemarket.123')+'@codemarket-staging.k16z7.mongodb.net/codemarket_shiraz?retryWrites=true&w=majority')
 # db = client.codemarket_shiraz.menu_data
 # try:
