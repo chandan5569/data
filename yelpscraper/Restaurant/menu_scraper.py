@@ -12,13 +12,13 @@ class Website(EmbeddedDocument):
     restaurant_name = StringField(max_length=250, required=True)
     city = StringField()
     keyword = StringField(max_length=250)
-    menu_data = []
+    menu_data = DictField()
 
 class Menu_scraper(Document):
     userid = StringField(max_length=120, required=True)
     name = StringField(max_length=120, required=True)
     status = StringField(max_length=120)
-    city = StringField(max_length=250)
+    city = ListField(StringField(max_length=250))
     keywords = ListField(StringField(max_length=250))
     created_timestamp = DateTimeField()
     last_updated = DateTimeField()
@@ -32,6 +32,7 @@ class Scraper:
         self.collections = "Menu"
         self.city = city
         self.all_websites = []
+        self.menu_data = {}
         self.final_result = set()
         try:
             self.get_scraped_data()
@@ -48,7 +49,7 @@ class Scraper:
             document = {'userid':self.userid,
                         'name':self.name,
                         'keywords':[self.keyword],
-                        'city':[self.city],
+                        'cities':[self.city],
                         'status': status,                    
                     }
             collection.insert_one(document)
@@ -79,6 +80,7 @@ class Scraper:
         print('Begin Scraping')
         connect(db = 'codemarket_shiraz', host = 'mongodb+srv://sumi:'+urllib.parse.quote_plus('sumi@123')+'@codemarket-staging.k16z7.mongodb.net/codemarket_shiraz?retryWrites=true&w=majority')
         with switch_collection(Menu_scraper, self.collections) as Menu_scraper:
+            menu_dict={}
             data = []
             for start in range (0, 10, 10):
                 Menu_scraper.objects(userid = self.userid, name = self.name).update(push__keywords = self.keyword)
@@ -89,69 +91,66 @@ class Scraper:
                     if 'ad_business_id' not in i['href']:
                         link = "https://www.yelp.com/"+i['href']
                         menu_link = link.split('/')
-                        menu_link[4] = '/menu/'
-                        menu_link[1] = '//'
-                        menu_link = ''.join(menu_link)
-                        menu_page = menu_link 
+                        menu_link = link.replace("biz", "menu")
                         # print(link)
                         # print(menu_link)
                         status = 'Scraping Restaurant Menu'
                         Menu_scraper.objects(userid = self.userid, name = self.name).update(set__status = status)
-                        menu_url = requests.get(menu_link)
-                        menu_soup = BeautifulSoup(menu_url.content, 'lxml')
-                        hotel_soup  = BeautifulSoup(menu_url.content, 'lxml')
-                        restaurantName = hotel_soup.find('h1')
-                        if restaurantName is None:
-                            continue 
-                        restaurantName = restaurantName.text.strip()
-                        restaurantName = restaurantName.strip('Menu for ')
-                        # print(restaurantName)
-                        if restaurantName in self.all_websites:
-                            print("Restaurant data already available")
-                        else:
-                            self.all_websites.append(restaurantName)
-                            menu = menu_soup.find("div", {"class": "menu-sections"})
-                            h2 = menu.find_all("h2")
-                            for h in h2:
-                                section = h.text.strip()
-                                items = h.parent.find_next_sibling()
-                                h4 = items.find_all("h4")
-                                for h44 in h4:
-                                    itemName=h44.text.strip()
-                                    price =h44.parent.find_next_sibling()
-                                    itemPrice = price.find("li", {"class", "menu-item-price-amount"})
-                                    
-                                    if itemPrice is None:
-                                        itemPrice = price.findAll('tr')#container.findAll('tr')
-                                        l1=[]
-                                        
-                                        for p in itemPrice:
-                                            size = p.find('th').text.strip()
-                                            pr = p.find('td').text.strip()
-                                            l1.append(size + ' - ' + pr)
-                                            itemPrice = ' , '.join(l1)
-                                    else:
-                                        itemPrice=itemPrice.text.strip()
-                                    
-                                    if len(itemPrice) == 0:
-                                        itemPrice = ""
-                                    
-                                    data.append({"Restaurant":restaurantName, "Category":section, "Item":itemName,"Price":itemPrice})
-                                    # print({"Hotel":restaurantName, "category":section, "item":itemName,"price":itemPrice})
-                                    website_object = Website()
-                                    website_object.restaurant_name = restaurantName
-                                    website_object.keyword = self.keyword
-                                    website_object.city = self.city
-                                    website_object.menu_data = data
+                        
+                        menu_url = requests.get(menu_link).text
+                        menu_soup = BeautifulSoup(menu_url, 'html.parser')
 
-                                    try:
-                                        Menu_scraper.objects(userid = self.userid, name = self.name).update(push__collection_of_menu_scraped = website_object)
-                                        Menu_scraper.objects(userid = self.userid, name = self.name).update(set__last_updated = datetime.datetime.now())
-                                    except:
-                                        print("Not Unique data")
-            # print(data)
-            dataset = pd.DataFrame(data,columns=['Restaurant', 'Category', 'Item', 'Price'])
-            # print(dataset)
+                        # Find restaurant name
+                        restaurantName = menu_soup.find('h1')
+                        if restaurantName == None:
+                            continue
+                        restaurantName = restaurantName.text.strip()
+                        restaurantName = restaurantName.strip("Menu for ")
+                        # print(restaurantName)
+                        
+                        # Find Category list like Appetizers, salads etc 
+                        category_list = []
+                        for j in menu_soup.find_all('div',{"class":"section-header"}):
+                            category = j.find('h2')
+                            c = category.text.strip()
+                            category_list.append(c)
+                        # print(category_list)
+
+                        # Scrap menu-item and menu-item-price for each category
+                        menu = {}
+                        count = 0
+                        for j in menu_soup.find_all('div', {"class": "u-space-b3"}):
+                            menu_item = []
+                            menu_item_price = []
+                            for i in j.find_all('div', {"class": "menu-item"}):
+                                menu_item_name = i.find('h4')
+                                menu_item_name = menu_item_name.text.strip()
+                                menu_item.append(menu_item_name)
+                                item_price = i.find('div',{"class": "menu-item-prices"})
+                                item_price = item_price.text.strip()
+                                menu_item_price.append(item_price)
+
+                            data = {'itemName': menu_item, 'itemPrice':menu_item_price}
+                            df = pd.DataFrame(data=data)
+                            menu[category_list[count]] = df.to_dict("records")
+                            count += 1
+                            if count == len(category_list):
+                                break
+
+
+
+                        website_object = Website()
+                        website_object.restaurant_name = restaurantName
+                                    # website_object.keyword = self.keyword
+                                    # website_object.city = self.city
+                        website_object.menu_data = menu
+
+                        try:
+                            Menu_scraper.objects(userid = self.userid, name = self.name).update(push__collection_of_menu_scraped = website_object)
+                            Menu_scraper.objects(userid = self.userid, name = self.name).update(set__last_updated = datetime.datetime.now())
+                        except:
+                            print("Not Unique data")
+            
 
         Menu_scraper.objects(userid = self.userid, name = self.name).update(set__status = "Scraping Completed")
                    
