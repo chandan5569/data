@@ -7,9 +7,11 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 import pandas as pd
 import time
+import pymongo
+import urllib.parse
 
 chrome_options = Options()
-# chrome_options.add_argument("--headless")
+chrome_options.add_argument("--headless")
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument('--disable-dev-shm-usage')
@@ -17,60 +19,70 @@ chrome_options.add_argument('--disable-dev-shm-usage')
 driver = webdriver.Chrome('/home/dhruv034/Desktop/codemarket/chromedriver_linux64/chromedriver',chrome_options=chrome_options)
 #driver = webdriver.Chrome('E:/Codes/chromedriver.exe')#,chrome_options=chrome_options)
 
-url = "https://www.yelp.com/search?find_desc=Indian+food&find_loc=Redondo+Beach%2C+CA"
-driver.get(url)
-html = driver.page_source
-soup = BeautifulSoup(html, 'html.parser')
+url = "https://www.yelp.com/menu/indias-tandoori-los-angeles"
+response = get(url).text
+soup = BeautifulSoup(response, 'html.parser')
+# print(soup)
 
-# WebDriverWait(driver, 10).until(lambda driver: driver.find_element_by_link_text('Start Order')).click()
+restaurantName = soup.find('h1')
+restaurantName = restaurantName.text.strip()
+restaurantName = restaurantName.strip("Menu for ")
+print(restaurantName)
 
-rest_list = soup.find('ul',class_="undefined list__09f24__17TsU")
-lilist = rest_list.findChildren(['li'])
-# Explicit wait for the site to load for slow internet connection
-wait = WebDriverWait(driver, 20)
-# print(lilist)
-for li in lilist:
-    link = li.find('a',class_="link__09f24__1kwXV link-color--inherit__09f24__3PYlA link-size--inherit__09f24__2Uj95")
-    
-    if link == None:
-        continue
-    
-    driver.get("https://yelp.com/" + link['href'])
-    # wait.until(
-    #     lambda driver: driver.find_element_by_class_name('lemon--div__373c0__1mboc tabLabel__373c0__2-upa')
-    # ).click()
-    rest = driver.page_source
-    rest_soup = BeautifulSoup(rest, 'html.parser')
-    rest_name = rest_soup.find('h1',class_ = "lemon--h1__373c0__2ZHSL heading--h1__373c0__dvYgw undefined heading--inline__373c0__10ozy").text
-    print(rest_name)
-    tab = wait.until(EC.element_to_be_clickable((
-        By.XPATH, '//div[@class="lemon--div__373c0__1mboc tab__373c0__24QGW tabNavItem__373c0__3X-YR tab--section__373c0__3V0A9 tab--no-outline__373c0__3adQG"]'
-    )))
-    tab.click()
-    order = wait.until(EC.element_to_be_clickable((
-        By.XPATH, '//button[@class="button__373c0__3lYgT primary__373c0__2ZWOb full__373c0__1AgIz"]'
-    )))
-    order.click()
-    # wait.until(
-    #     lambda driver: driver.find_element_by_link_text("Start Order")
-    # ).click()
+# category_list = []
+# for j in soup.find_all('div',{"class":"section-header"}):
+#     category = j.find('h2')
+#     c = category.text.strip()
+#     category_list.append(c)
+# # print(category_list)
 
-    time.sleep(10)
-    menu_link = driver.current_url
-    driver.get(menu_link)
-    menu_page = driver.page_source
-    menu_soup = BeautifulSoup(menu_page, 'html.parser')
-    # print(menu_soup)
-    # menu = menu_soup.find('a',class_="lemon--a__85e3c__IEZFH link__85e3c__29943 link-color--blue-dark__85e3c__1mhJo link-size--default__85e3c__1skgq").text
-    # print(menu + "Menu")
-    # menu_list = menu_soup.find('div',class_="lemon--div__85e3c__1mboc menu-item-wrapper__85e3c__2jk74 u-sm-space-t0 u-sm-space-b0 border-color--default__85e3c__2oFDT")
-    # list_menu = menu_list.findChildren(['p'])
-    # print(list_menu)
+# menu = {}
+# count = 0
+# for j in soup.find_all('div', {"class": "u-space-b3"}):
+#     menu_item = []
+#     menu_item_price = []
+#     for i in j.find_all('div', {"class": "menu-item"}):
+#         menu_item_name = i.find('h4')
+#         menu_item_name = menu_item_name.text.strip()
+#         menu_item.append(menu_item_name)
+#         item_price = i.find('div',{"class": "menu-item-prices"})
+#         item_price = item_price.text.strip()
+#         menu_item_price.append(item_price)
 
-    lm = []
-    for data in menu_soup:
-        dataframe = {}
-        # dataframe["item_name"] = data.find('p',class_="lemon--p__85e3c__3Qnnj text__85e3c__2pB8f name__85e3c__1xq7V text-color--normal__85e3c__K_MKN text-align--left__85e3c__2pnx_").text
-        dataframe["price"] = data.find('p',class_="lemon--p__85e3c__3Qnnj text__85e3c__2pB8f price__85e3c__33BRs text-color--normal__85e3c__K_MKN text-align--left__85e3c__2pnx_ text-weight--bold__85e3c__3HYJa").text
-        lm.append(dataframe)
-    print(lm)
+#     data = {'itemName': menu_item, 'itemPrice':menu_item_price}
+#     df = pd.DataFrame(data=data)
+#     menu[category_list[count]] = df.to_dict("records")
+#     count += 1
+#     if count == len(category_list):
+#         break
+
+# print(menu)
+
+
+# column_div = soup.find('div',class_="column column-alpha")
+# menu_header_unstrip = column_div.find('h1').text
+# menu_header = menu_header_unstrip.strip()
+# print(menu_header)
+
+# menu_sections = soup.find('div',class_="menu-sections")
+# # print(menu-sections)
+# menu=[]
+# menu_item = menu_sections.findChildren(['h4'])
+# menu_item_price = menu_sections.findChildren(['li'])
+# for (h4, li) in zip(menu_item, menu_item_price):
+#     dataframe = {}
+#     item = h4.text
+#     dataframe['itemName'] = item.strip()
+#     price = li.text
+#     dataframe['itemPrice'] = price.strip()
+#     menu.append(dataframe)
+
+# print(menu)
+# client = pymongo.MongoClient('mongodb+srv://shiraza:'+urllib.parse.quote_plus('Codemarket.123')+'@codemarket-staging.k16z7.mongodb.net/codemarket_shiraz?retryWrites=true&w=majority')
+# db = client.codemarket_shiraz.menu_data
+# try:
+#     # db.insert_one(menu_header)
+#     db.insert_many(menu)
+#     print("Menu data inserted")
+# except:
+#     print("An error occured while storing menu data.")
