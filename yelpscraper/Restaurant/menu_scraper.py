@@ -18,7 +18,7 @@ class Menu_scraper(Document):
     userid = StringField(max_length=120, required=True)
     name = StringField(max_length=120, required=True)
     status = StringField(max_length=120)
-    city = ListField(StringField(max_length=250))
+    cities = ListField(StringField(max_length=250))
     keywords = ListField(StringField(max_length=250))
     created_timestamp = DateTimeField()
     lastUpdated = DateTimeField()
@@ -85,6 +85,7 @@ class Scraper:
             data = []
             for start in range (0, 20, 10):
                 Menu_scraper.objects(userid = self.userid, name = self.name).update(push__keywords = self.keyword)
+                Menu_scraper.objects(userid = self.userid, name  = self.name).update(push__cities =self.city)
                 url = self.get_url(start)
                 source = requests.get(url).text
                 soup = BeautifulSoup(source, 'html.parser')
@@ -124,6 +125,7 @@ class Scraper:
 
                             # Scrap menu-item and menu-item-price for each category
                             menu = {}
+                            menu_list = []
                             count = 0
                             for j in menu_soup.find_all('div', {"class": "u-space-b3"}):
                                 menu_item = []
@@ -138,10 +140,12 @@ class Scraper:
 
                                 data = {'itemName': menu_item, 'itemPrice':menu_item_price}
                                 df = pd.DataFrame(data=data)
-                                menu[category_list[count]] = df.to_dict("records")
+                                # menu[category_list[count]] = df.to_dict("records")
+                                menu_list.append( { 'category':category_list[count], 'categoryItems': df.to_dict("records")  })
                                 count += 1
                                 if count == len(category_list):
                                     break
+                                menu = {'restaurantName': rest_name, 'menuList': menu_list}
 
                             website_object = Website()
                             website_object.restaurantName = rest_name
@@ -155,7 +159,7 @@ class Scraper:
                             except:
                                 print("Not Unique data")            
 
-        Menu_scraper.objects(userid = self.userid, name = self.name).update(set__status = "Scraping Completed")
+            Menu_scraper.objects(userid = self.userid, name = self.name).update(set__status = "Scraping Completed")
                    
         print('End Scraping')
 
