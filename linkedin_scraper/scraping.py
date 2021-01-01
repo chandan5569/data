@@ -11,14 +11,22 @@ import dns
 from mongoengine import *
 from mongoengine.context_managers import switch_collection
 import random
-
+import sys
 
 def linkedin_scraper():
-    Email_id = input("Please enter the login email: ")
-    Password = input("Please enter the password: ")
-    start_page_number = int(input("From which page to start: "))
-    end_page_number = int(input("At which page to end: "))
+    # Email_id = input("Please enter the login email: ")
+    # Password = input("Please enter the password: ")
+    # start_page_number = int(input("From which page to start: "))
+    # end_page_number = int(input("At which page to end: "))
+    Email_id = sys.argv[1]
+    Password = sys.argv[2]
+    start_page_number = int(sys.argv[3])
+    end_page_number = int(sys.argv[4])
 
+    # print(Email_id)
+    # print(Password)
+    # print(start_page_number)
+    # print(end_page_number)
     sleeps = [2, 3, 4, 5, 6, 7, 8, 9, 10]
     print("Scraping in progress")
     chrome_options = Options()
@@ -27,8 +35,8 @@ def linkedin_scraper():
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument('--disable-dev-shm-usage')
 
-    #PATH = r"C:\Users\BILAL\Projects\LinkedInScraper\chromedriver.exe"
-   # driver = webdriver.Chrome(PATH, chrome_options=chrome_options)
+    # PATH = r"C:\Users\BILAL\Projects\LinkedInScraper\chromedriver.exe"
+    # driver = webdriver.Chrome(PATH, chrome_options=chrome_options)
     PATH = r"/usr/local/bin/chromedriver"
     driver = webdriver.Chrome(PATH, chrome_options=chrome_options)
     driver.get("https://www.linkedin.com/login")
@@ -41,13 +49,13 @@ def linkedin_scraper():
 
     password.send_keys(Keys.RETURN)
     time.sleep(5)
-
+    
     if driver.current_url == 'https://www.linkedin.com/checkpoint/lg/login-submit':
         print("Incorrect login details")
         linkedin_scraper()
 
     if 'https://www.linkedin.com/checkpoint/lg/login?errorKey=challenge_global_internal_error' in driver.current_url:
-        print("Sorry something went wrong. Please try again")
+        print("Sorry something went wrong. Please try again later")
         linkedin_scraper()
 
     def otp():
