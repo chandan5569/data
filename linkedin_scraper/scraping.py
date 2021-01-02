@@ -39,10 +39,10 @@ def linkedin_scraper():
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument('--disable-dev-shm-usage')
 
-    PATH = r"C:\Users\BILAL\Projects\LinkedInScraper\chromedriver.exe"
-    driver = webdriver.Chrome(PATH, chrome_options=chrome_options)
-    # PATH = r"/usr/local/bin/chromedriver"
+    # PATH = r"C:\Users\BILAL\Projects\LinkedInScraper\chromedriver.exe"
     # driver = webdriver.Chrome(PATH, chrome_options=chrome_options)
+    PATH = r"/usr/local/bin/chromedriver"
+    driver = webdriver.Chrome(PATH, chrome_options=chrome_options)
     driver.get("https://www.linkedin.com/login")
 
     driver.find_element_by_id("username").send_keys(Email_id)
