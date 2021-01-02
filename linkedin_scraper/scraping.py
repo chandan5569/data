@@ -22,23 +22,27 @@ def linkedin_scraper():
     Password = sys.argv[2]
     start_page_number = int(sys.argv[3])
     end_page_number = int(sys.argv[4])
-
+    
+    client = pymongo.MongoClient('mongodb+srv://bilalm:' + urllib.parse.quote_plus('Codemarket.123') + '@codemarket-staging.k16z7.mongodb.net/dreamjobpal?retryWrites=true&w=majority')
+    my_db = client['dreamjobpal']
+    db = my_db.linkedinContacts
+    
     # print(Email_id)
     # print(Password)
     # print(start_page_number)
     # print(end_page_number)
-    sleeps = [2, 3, 4, 5, 6, 7, 8, 9, 10]
-    print("Scraping in progress")
+    sleeps = [2, 3, 4, 5, 6, ]
+    
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument('--disable-dev-shm-usage')
 
-    # PATH = r"C:\Users\BILAL\Projects\LinkedInScraper\chromedriver.exe"
-    # driver = webdriver.Chrome(PATH, chrome_options=chrome_options)
-    PATH = r"/usr/local/bin/chromedriver"
+    PATH = r"C:\Users\BILAL\Projects\LinkedInScraper\chromedriver.exe"
     driver = webdriver.Chrome(PATH, chrome_options=chrome_options)
+    # PATH = r"/usr/local/bin/chromedriver"
+    # driver = webdriver.Chrome(PATH, chrome_options=chrome_options)
     driver.get("https://www.linkedin.com/login")
 
     driver.find_element_by_id("username").send_keys(Email_id)
@@ -59,8 +63,27 @@ def linkedin_scraper():
         linkedin_scraper()
 
     def otp():
-        otp = int(input("Please enter the OTP recieved at registered mobile number: "))
-        driver.current_url
+        print("OTP generated")
+        otp_db = my_db.linkedin_otp
+        otp_db.insert({"linkedin_login_url": Email_id, "Status":"OTP sent"})
+    # execute "python otp.py <email> <otp>" in another terminal
+        flag = True
+        while flag:
+            data = otp_db.find({"linkedin_login_url": Email_id, "Status":"OTP updated"})
+            data = list(data)
+            # print(data)
+            # print(len(data))
+            if len(data) == 1:
+                # print(data[0]['OTP'])
+                otp = data[0]['OTP']
+                # print("otp is: ",otp)
+                otp_db.update_many( 
+                {"linkedin_login_url":Email_id, "Status":"OTP updated"}, 
+                { "$set":{ "Status":"Login complete" }},)
+                break
+            time.sleep(5)
+        # otp = int(input("Please enter the OTP recieved at registered mobile number: "))
+        # driver.current_url
         submit_otp = driver.find_element_by_name("pin")
         submit_otp.send_keys(otp)
         submit_otp.send_keys(Keys.RETURN)
@@ -71,14 +94,13 @@ def linkedin_scraper():
     if driver.current_url == 'https://www.linkedin.com/checkpoint/challenge/verify':
         print("Incorrect OTP")
         otp()
-
+    
     data = []
     data_csv = []
-
-    client = pymongo.MongoClient('mongodb+srv://bilalm:' + urllib.parse.quote_plus('Codemarket.123') + '@codemarket-staging.k16z7.mongodb.net/dreamjobpal?retryWrites=true&w=majority')
-    my_db = client['dreamjobpal']
-    db = my_db.linkedinContacts
-
+    my_db.linkedin_otp.drop()
+    
+    print("Scraping in progress")
+    my_db.linkedin_otp.drop()
     time.sleep(1)
     soup = BeautifulSoup(driver.page_source, features="html.parser")
     time.sleep(5)
