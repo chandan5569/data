@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
 from bs4 import BeautifulSoup
 import requests
 import pandas as pd
@@ -12,36 +6,50 @@ import urllib.parse
 import dns
 from mongoengine import *
 from mongoengine.context_managers import switch_collection
-
-
-# In[59]:
-
+import sys
+import time
+import random
 
 def hotel_menu():
-    item = input("Please enter the name of food item: ")
-    place = input("Please enter the location: ")
-    number_of_hotels = int(input("Enter the number of hotels: "))
-    count = 0
-    
+#     item = input("Please enter the name of food item: ")
+#     place = input("Please enter the location: ")
+#     number_of_hotels = int(input("Enter the number of hotels: "))
+    keyword = sys.argv[1]
+    city = sys.argv[2]
+    state = sys.argv[3]
+    place = city+state
+    start = int(sys.argv[4])
+    if start == 1:
+        start = 0
+    else:
+        start = 10*start-10
+    end = int(sys.argv[5])
+    end = 10*end-10
+    print(start)
+    print(end)
+    print("started")
+
     client = pymongo.MongoClient('mongodb+srv://bilalm:'+urllib.parse.quote_plus('Codemarket.123')+'@codemarket-staging.k16z7.mongodb.net/dreamjobpal?retryWrites=true&w=majority')
     my_db = client['dreamjobpal']
     db = my_db.hotel_menu
     
-    data = []
     
-    for page in range (0, 240, 10):
-        if count >= number_of_hotels:
-            break
-        source = requests.get(f"https://www.yelp.com/search?find_desc={item}&find_loc={place}&ns=1&start={page}").text
+    
+    sleeps = [1,2,3,4]
+    for i in range (start, end+10, 10):
+#         if end > start:
+#             break
+        source = requests.get(f"https://www.yelp.com/search?find_desc={keyword}&find_loc={place}&ns=1&start={i}").text
+        # print(f"https://www.yelp.com/search?find_desc={keyword}&find_loc={place}&ns=1&start={start}")
         soup = BeautifulSoup(source, 'html.parser')
+        time.sleep(random.choice(sleeps))
         
 
         for i in soup.findAll("a", {"class": "link__09f24__1kwXV link-color--inherit__09f24__3PYlA link-size--inherit__09f24__2Uj95"}):         
-            
-            if count >= number_of_hotels:
-                break
-            if 'ad_business_id' not in i['href']:
 
+            restaurant_data = []
+            
+            if 'ad_business_id' not in i['href']:
                 link = "https://www.yelp.com/"+i['href']
                 menu_link = link.split('/')
                 menu_link[4] = '/menu/'
@@ -59,66 +67,48 @@ def hotel_menu():
                     continue 
                 
                 hotel_name = hotel_name.text.strip()
+                hotel_name = hotel_name.split(' ')[2:]
+                hotel_name = ' '.join(hotel_name)
                 menu = menu_soup.find("div", {"class": "menu-sections"})
                 h2 = menu.find_all("h2")
                 
                 for h in h2:
+                    section_data = []
                     section = h.text.strip()
                     items = h.parent.find_next_sibling()
                     h4 = items.find_all("h4")
                     
                     for h44 in h4:
+                        data = []
                         name_result=h44.text.strip()
                         price =h44.parent.find_next_sibling()
                         price_result = price.find("li", {"class", "menu-item-price-amount"})
                         
                         if price_result is None:
-                            price_result = price.findAll('tr')#container.findAll('tr')
-                            l1=[]
-                            
+                            price_result = price.findAll('tr')
+                            quantity=[]
                             for p in price_result:
                                 size = p.find('th').text.strip()
                                 pr = p.find('td').text.strip()
-                                l1.append(size + ' - ' + pr)
-                                price_result = ' , '.join(l1)
+                                quantity.append({"Quantity": size, "Price": pr})
+                                price_result = quantity
                         else:
                             price_result=price_result.text.strip()
                         
                         if len(price_result) == 0:
                             price_result = ""
-                        
-                        data.append({"Restaurant":hotel_name, "Category":section, "Item":name_result,"Price":price_result})
-                       # print({"Hotel":hotel_name, "category":section, "item":name_result,"price":price_result})
-                        db.insert({"Restaurant":hotel_name, "Category":section, "Item":name_result,"Price":price_result})
-                count +=1
+                        section_data.append({"Item":name_result,"Price":price_result})
+                    
+                   
+                    restaurant_data.append({"Category":section, "Items": section_data}) 
+                    time.sleep(random.choice(sleeps))
+                db.insert({"Restaurant_Name":hotel_name,"Restaurant_Menu":restaurant_data})
+                
                 
                 
            
    # print(data)
-    dataset = pd.DataFrame(data,columns=['Restaurant', 'Category', 'Item', 'Price'])
-    dataset.to_csv(item+'.csv')
-
-
-# In[60]:
-
+    dataset = pd.DataFrame(restaurant_data,columns=['Menu'])
+    dataset.to_csv(keyword+'.csv')
 
 hotel_menu()
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-

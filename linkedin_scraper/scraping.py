@@ -63,7 +63,7 @@ def linkedin_scraper():
         linkedin_scraper()
 
     def otp():
-        print("OTP generated")
+        print("Linkedin sent you an OTP to your email.")
         otp_db = my_db.linkedin_otp
         otp_db.insert({"linkedin_login_url": Email_id, "Status":"OTP sent"})
     # execute "python otp.py <email> <otp>" in another terminal
