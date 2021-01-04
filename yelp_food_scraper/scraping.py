@@ -17,7 +17,7 @@ def hotel_menu():
     keyword = sys.argv[1]
     city = sys.argv[2]
     state = sys.argv[3]
-    place = city+state
+    place = city+' '+state
     start = int(sys.argv[4])
     if start == 1:
         start = 0
@@ -25,14 +25,14 @@ def hotel_menu():
         start = 10*start-10
     end = int(sys.argv[5])
     end = 10*end-10
-    print(start)
-    print(end)
-    print("started")
+    # print(start)
+    # print(end)
+    print("Scraping started")
+    print(place)
 
     client = pymongo.MongoClient('mongodb+srv://bilalm:'+urllib.parse.quote_plus('Codemarket.123')+'@codemarket-staging.k16z7.mongodb.net/dreamjobpal?retryWrites=true&w=majority')
     my_db = client['dreamjobpal']
     db = my_db.hotel_menu
-    
     
     
     sleeps = [1,2,3,4]
@@ -59,8 +59,8 @@ def hotel_menu():
                 print(link)
                 print("Hotel menu- " +menu_page)
                 menu_url = requests.get(menu_link)
-                menu_soup = BeautifulSoup(menu_url.content, 'lxml')
-                hotel_soup  = BeautifulSoup(menu_url.content, 'lxml')
+                menu_soup = BeautifulSoup(menu_url.content, 'html.parser')
+                hotel_soup  = BeautifulSoup(menu_url.content, 'html.parser')
                 hotel_name = hotel_soup.find('h1')
                 
                 if hotel_name is None:
@@ -107,7 +107,7 @@ def hotel_menu():
                 
                 
            
-   # print(data)
+    print("Scraping stopped")
     dataset = pd.DataFrame(restaurant_data,columns=['Menu'])
     dataset.to_csv(keyword+'.csv')
 
