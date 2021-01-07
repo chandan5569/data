@@ -12,6 +12,7 @@ import re
 import requests
 import urllib.parse
 from time import sleep
+import csv
 
 #Use Incognito mode when scraping
 chrome_options = Options()
@@ -24,8 +25,15 @@ url = "https://www.youtube.com/results?search_query=" + SearchWord
 browser.get(url)
 
 x = browser
-browser.page_source
+x.page_source
 aTag = x.find_elements_by_xpath('//*[@id="video-title"]') #Finding div of video-title 
+
+#Saving all videoName And VideoHref in aAttribute dict
+aAttribute = {}
+for a in aTag:
+    videoTitle = a.get_attribute("title")
+    videoHref = a.get_attribute("href")
+    aAttribute[videoTitle] = videoHref
 
 #Function for getting channel Name and Channel href
 def browseChannelUrl(urlBrowse):
@@ -45,32 +53,37 @@ def aboutRetrieveUrl(urlChannel):
     link = {}
     browser.get(urlChannel)
     browser.page_source
-    btn = browser.find_element_by_xpath('//*[@id="tabsContent"]/paper-tab[6]/div')
+    text_list = browser.find_elements_by_xpath("//div[@class='tab-content style-scope paper-tab']")  
+    btn = text_list[-1]    # Fetching the text of last element
     btn.click()
     browser.page_source
     data = browser.find_element_by_xpath('//*[@id="links-container"]') 
-    aTag = data.find_elements_by_tag_name('a')
-    for a in aTag:
+    aTags = data.find_elements_by_tag_name('a')
+    for a in aTags:
         #print(a.text, a.get_attribute('href'))
         link[a.text] = a.get_attribute('href')
     return link
     
 #aboutRetrieveUrl('https://www.youtube.com/channel/UCkNrj1l4JLvLX7M42fJoLGw')
 
-#Going thourgh all div of video-title and retrieving all necessary data
-for a in aTag:
-    print(a.get_attribute("title"))
-    print(a.get_attribute("href"))
-    videoTitle = a.get_attribute("title")
-    videoHref = a.get_attribute("href")
-    sleep(1)
-    chanelName, channelHref = browseChannelUrl(videoHref) #Call
-    sleep(1)
-    aboutLink = aboutRetrieveUrl(channelHref) #Call
-    sleep(1)
-    #print(videoTitle, videoHref)
-    print(chanelName, channelHref)
-    print(aboutLink)
-    print("---------------")
+#Going thourgh all dict aAttribuue dict for retrieving all necessary data and saving it in CSV file
+with open('YTScriptData.csv', mode='w') as csv_file:
+    fieldnames = ['VideoTitle', 'VideoHref', 'ChannelName', 'ChannelHref', 'Links']
+    writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+    writer.writeheader()
+    
+    for key, value in aAttribute.items(): #dict
+        videoTitle = key
+        videoHref = value
+        sleep(1)
+        chanelName, channelHref = browseChannelUrl(videoHref)
+        sleep(1)
+        aboutLinks = aboutRetrieveUrl(channelHref)
+        sleep(1)
+        #print(videoTitle, videoHref)
+        #print(chanelName, channelHref)
+        #print(aboutLinks)
+        writer.writerow({'VideoTitle': videoTitle, 'VideoHref': videoHref, 'ChannelName': chanelName, 'ChannelHref':channelHref, 'Links':aboutLinks})
+        #print("-----------")
 
 # Getting selenium.common.exceptions.StaleElementReferenceException this exception !! Only 1 loop works !! Csv !! Pending!!
