@@ -53,6 +53,11 @@ category_list = []
 for j in soup.find_all('div', {"class":"section-header"}):
     category = j.find('h2')
     c = category.text.strip()
+    c = c.replace(" ", "")
+    if "(" in c:
+        c = c.replace("(", "")
+    if ")" in c:
+        c = c.replace(")", "")
     category_list.append(c)
 menu = {}   
 count = 0
@@ -66,7 +71,7 @@ for j in soup.find_all('div', {"class":"u-space-b3"}):
         menu_item_price = i.find('div',{"class":"menu-item-prices"})
         p = menu_item_price.text.strip()
         menu_price.append(p)
-    data={'Menu Name': menu_name, 'Menu Prices': menu_price}
+    data={'Menu_Name': menu_name, 'Menu_Prices': menu_price}
     df=pd.DataFrame(data=data)
     menu[category_list[count]] = df.to_dict("records")
     count += 1
@@ -89,7 +94,7 @@ from bson.objectid import ObjectId
 client = pymongo.MongoClient('mongodb+srv://sumi:'+urllib.parse.quote_plus('sumi@123')+'@codemarket-staging.k16z7.mongodb.net/codemarket_shiraz?retryWrites=true&w=majority')
 db = client.codemarket_shiraz
 restaurant = db.restaurantMenu
-restaurant.insert_many([{"Restaurant Name": "Spice Six", "Restaurant Menu": menu}]) #For inserting data 
-r = restaurant.find({"Restaurant Name": "Spice Six"})
+restaurant.insert_many([{"RestaurantName": "Spice Six", "RestaurantMenu": menu}]) #For inserting data 
+r = restaurant.find({"RestaurantName": "Spice Six"})
 for x in r:
     print(x)
