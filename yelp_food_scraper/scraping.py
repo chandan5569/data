@@ -14,21 +14,22 @@ def hotel_menu():
 #     item = input("Please enter the name of food item: ")
 #     place = input("Please enter the location: ")
 #     number_of_hotels = int(input("Enter the number of hotels: "))
-    keyword = sys.argv[1]
-    city = sys.argv[2]
-    state = sys.argv[3]
+    User_id = sys.argv[1]
+    keyword = sys.argv[2]
+    city = sys.argv[3]
+    state = sys.argv[4]
     place = city+' '+state
-    start = int(sys.argv[4])
+    start = int(sys.argv[5])
     if start == 1:
         start = 0
     else:
         start = 10*start-10
-    end = int(sys.argv[5])
+    end = int(sys.argv[6])
     end = 10*end-10
-    # print(start)
-    # print(end)
-    print("Scraping started")
+    print(User_id)
     print(place)
+    print("Scraping started")
+    # print(place)
 
     client = pymongo.MongoClient('mongodb+srv://bilalm:'+urllib.parse.quote_plus('Codemarket.123')+'@codemarket-staging.k16z7.mongodb.net/dreamjobpal?retryWrites=true&w=majority')
     my_db = client['dreamjobpal']
@@ -56,20 +57,27 @@ def hotel_menu():
                 menu_link[1] = '//'
                 menu_link = ''.join(menu_link)
                 menu_page = menu_link 
-                print(link)
-                print("Hotel menu- " +menu_page)
+                # print(link)
+                # print("Hotel menu- " +menu_page)
                 menu_url = requests.get(menu_link)
                 menu_soup = BeautifulSoup(menu_url.content, 'html.parser')
+                time.sleep(random.choice(sleeps))
                 hotel_soup  = BeautifulSoup(menu_url.content, 'html.parser')
                 hotel_name = hotel_soup.find('h1')
-                
+                # print(hotel_name)
+                # print(hotel_name)
+                # break
                 if hotel_name is None:
                     continue 
+                # if "Menu" not in hotel_name:
+                #     continue
                 
                 hotel_name = hotel_name.text.strip()
                 hotel_name = hotel_name.split(' ')[2:]
                 hotel_name = ' '.join(hotel_name)
                 menu = menu_soup.find("div", {"class": "menu-sections"})
+                if menu == None:
+                    continue
                 h2 = menu.find_all("h2")
                 
                 for h in h2:
@@ -102,7 +110,7 @@ def hotel_menu():
                    
                     restaurant_data.append({"Category":section, "Items": section_data}) 
                     time.sleep(random.choice(sleeps))
-                db.insert({"Restaurant_Name":hotel_name,"Restaurant_Menu":restaurant_data})
+                db.insert({"User_Id": User_id, "Keyword": keyword, "City": city, "State":state, "Restaurant_Name": hotel_name,"Restaurant_Menu": restaurant_data})
                 
                 
                 
