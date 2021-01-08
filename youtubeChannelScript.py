@@ -13,6 +13,8 @@ import requests
 import urllib.parse
 from time import sleep
 import csv
+import pymongo
+from bson.objectid import ObjectId
 
 #Use Incognito mode when scraping
 chrome_options = Options()
@@ -66,6 +68,11 @@ def aboutRetrieveUrl(urlChannel):
     
 #aboutRetrieveUrl('https://www.youtube.com/channel/UCkNrj1l4JLvLX7M42fJoLGw')
 
+#Mongodb Connection
+client = pymongo.MongoClient('mongodb+srv://sumi:'+urllib.parse.quote_plus('sumi@123')+'@codemarket-staging.k16z7.mongodb.net/codemarket_shiraz?retryWrites=true&w=majority')
+db = client.codemarket_shiraz #db
+YTData = db.youtubeScriptData #collection
+
 #Going thourgh all dict aAttribuue dict for retrieving all necessary data and saving it in CSV file
 with open('YTScriptData.csv', mode='w') as csv_file:
     fieldnames = ['VideoTitle', 'VideoHref', 'ChannelName', 'ChannelHref', 'Links']
@@ -83,7 +90,6 @@ with open('YTScriptData.csv', mode='w') as csv_file:
         #print(videoTitle, videoHref)
         #print(chanelName, channelHref)
         #print(aboutLinks)
-        writer.writerow({'VideoTitle': videoTitle, 'VideoHref': videoHref, 'ChannelName': chanelName, 'ChannelHref':channelHref, 'Links':aboutLinks})
+        writer.writerow({'VideoTitle': videoTitle, 'VideoHref': videoHref, 'ChannelName': chanelName, 'ChannelHref':channelHref, 'Links':aboutLinks}) #inserting in csv file
+        YTData.insert({'VideoTitle': videoTitle, 'VideoHref': videoHref, 'ChannelName': chanelName, 'ChannelHref':channelHref, 'Links':aboutLinks}, check_keys=False) #Inserting in db
         #print("-----------")
-
-# Getting selenium.common.exceptions.StaleElementReferenceException this exception !! Only 1 loop works !! Csv !! Pending!!
