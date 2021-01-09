@@ -52,7 +52,7 @@ def browseChannelUrl(urlBrowse):
 
 #Function for Retrieving all link from about page
 def aboutRetrieveUrl(urlChannel):
-    link = {}
+    #link = {}
     browser.get(urlChannel)
     browser.page_source
     text_list = browser.find_elements_by_xpath("//div[@class='tab-content style-scope paper-tab']")  
@@ -61,10 +61,11 @@ def aboutRetrieveUrl(urlChannel):
     browser.page_source
     data = browser.find_element_by_xpath('//*[@id="links-container"]') 
     aTags = data.find_elements_by_tag_name('a')
-    for a in aTags:
-        #print(a.text, a.get_attribute('href'))
-        link[a.text] = a.get_attribute('href')
-    return link
+    l = [{"Link_Name":a.text, "Link":a.get_attribute('href')} for a in aTags]
+    # for a in aTags:
+    #     #print(a.text, a.get_attribute('href'))
+    #     link[a.text] = a.get_attribute('href')
+    return l
     
 #aboutRetrieveUrl('https://www.youtube.com/channel/UCkNrj1l4JLvLX7M42fJoLGw')
 
@@ -92,4 +93,4 @@ with open('YTScriptData.csv', mode='w') as csv_file:
         #print(aboutLinks)
         writer.writerow({'VideoTitle': videoTitle, 'VideoHref': videoHref, 'ChannelName': chanelName, 'ChannelHref':channelHref, 'Links':aboutLinks}) #inserting in csv file
         YTData.insert({'VideoTitle': videoTitle, 'VideoHref': videoHref, 'ChannelName': chanelName, 'ChannelHref':channelHref, 'Links':aboutLinks}, check_keys=False) #Inserting in db
-        #print("-----------")
+        print("-----One Document Inserted.------")
