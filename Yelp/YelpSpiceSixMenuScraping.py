@@ -4,9 +4,9 @@
 #import
 from bs4 import BeautifulSoup
 from bs4 import BeautifulSoup as bs4
-from selenium import webdriver 
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver import Chrome
+# from selenium import webdriver 
+# from selenium.webdriver.chrome.options import Options
+# from selenium.webdriver import Chrome
 import pandas as pd
 import re
 import requests
