@@ -18,10 +18,13 @@ def linkedin_scraper():
     # Password = input("Please enter the password: ")
     # start_page_number = int(input("From which page to start: "))
     # end_page_number = int(input("At which page to end: "))
-    Email_id = sys.argv[1]
-    Password = sys.argv[2]
-    start_page_number = int(sys.argv[3])
-    end_page_number = int(sys.argv[4])
+    User_id = sys.argv[1]
+    Email_id = sys.argv[2]
+    Password = sys.argv[3]
+    start_page_number = int(sys.argv[4])
+    end_page_number = int(sys.argv[5])
+
+
     
     client = pymongo.MongoClient('mongodb+srv://bilalm:' + urllib.parse.quote_plus('Codemarket.123') + '@codemarket-staging.k16z7.mongodb.net/dreamjobpal?retryWrites=true&w=majority')
     my_db = client['dreamjobpal']
@@ -308,7 +311,7 @@ def linkedin_scraper():
 
     # print("You exceeded the page limit")
     print("Scraping stopped")
-    db.insert({"User_id": "user_id", "linkedin_login_email": Email_id, "collectionOfContacts": data})
+    db.insert({"User_Id": User_id, "linkedin_login_email": Email_id, "collectionOfContacts": data})
     dataset = pd.DataFrame(data, columns=['User_id','linkedin_login_email','Name', 'Experience', 'Education', 'LinkedIn_URL', 'Websites', 'Phone', 'Address', 'Email', 'Instant_Messenger', 'Links'])
     dataset.to_csv('details.csv')
 
