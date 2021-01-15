@@ -20,126 +20,147 @@ client = pymongo.MongoClient('mongodb+srv://sumi:'+urllib.parse.quote_plus('sumi
 db = client.codemarket_shiraz
 restaurant = db.restaurantMenu
 
-### Step 1 : Searching By Beautifulsoup By entering direct link
-IdUser = sys.argv[1]
-# find = "Indian Food"
-find = sys.argv[2]
-# near = "Redando Beach, CA"
-near = sys.argv[3]
+# if len(sys.argv) < 6:
+#     print("Enter All value")
 
-url = "https://www.yelp.com/search?find_desc=" + find + "&find_loc=" + near
-response = requests.get(url)
-data = response.text
-soup = BeautifulSoup(data,'html.parser')
+# if ((IdUser is None) and (find is None) and (near is None) and (rest_name is None)):
+if len(sys.argv) == 5:
+    #Taking Input
+    IdUser = sys.argv[1]
+    #print("id", IdUser)
+    # find = "Indian Food"
+    find = sys.argv[2]
+    #print("find", find)
+    # near = "Redando Beach, CA"
+    near = sys.argv[3]
+    #print("Near", near)
+    rest_name = str(sys.argv[4])
 
-### Step 2 : Finding Spice Six restaurant name By Beautifulsoup
-rest_name = 'Famous Tandoori'
-rest_name2 = str(sys.argv[4])
-print("RestName", rest_name, type(rest_name), rest_name2, type(rest_name2))
-restATag = soup.find('a', text=rest_name)
-restATag2 = soup.find('a', text=rest_name2)
-print(restATag)
-print("-------")
-print(restATag2)
+    #Stripping Extra Spaces
+    IdUser = IdUser.strip()
+    find = find.strip()
+    near = near.strip()
+    rest_name = rest_name.strip()
 
-### Step 3 : Retrieving link and concatenate
-url = "https://www.yelp.com" + restATag['href']
-#print("URLLLLL", url)
-response = requests.get(url)
-data = response.text
-#print(data)
-soup = BeautifulSoup(data,'html.parser')
+    ### Step 1 : Searching By Beautifulsoup By entering direct link
+    url = "https://www.yelp.com/search?find_desc=" + find + "&find_loc=" + near
+    response = requests.get(url)
+    data = response.text
+    soup = BeautifulSoup(data,'html.parser')
 
-### Step 4 : Converting link of menu page of Spice Six
-url = url.split("?")[0]
-url = url.replace("biz", "menu")
-response = requests.get(url)
-data = response.text
-soup = BeautifulSoup(data,'html.parser')
+    ### Step 2 : Finding Spice Six restaurant name By Beautifulsoup
+    #rest_name = 'Famous Tandoori'
+    print("RestName", rest_name, type(rest_name))
+    restATag = soup.find('a', {"name":rest_name})
+    #restATag2 = soup.find('a', {"name":rest_name2})
+    print("ATag", restATag)
+    #print("-------")
+    #print("RestA2", restATag2)
 
-### Step 5 : Go to that link and retrieving data (Menu Name , Menu Price, categories)
-# menu_name = []
-# menu_price = []
+    ### Step 3 : Retrieving link and concatenate
+    url = "https://www.yelp.com" + restATag['href']
+    #print("URLLLLL", url)
+    response = requests.get(url)
+    data = response.text
+    #print(data)
+    soup = BeautifulSoup(data,'html.parser')
 
-# for j in soup.find_all('div', {"class":"menu-item"}):
-#     menu_item_name = j.find('h4')
-#     m = menu_item_name.text.strip()
-#     menu_name.append(m)
-#     menu_item_price = j.find('div',{"class":"menu-item-prices"})
-#     p = menu_item_price.text.strip()
-#     menu_price.append(p)
+    ### Step 4 : Converting link of menu page of Spice Six
+    url = url.split("?")[0]
+    url = url.replace("biz", "menu")
+    response = requests.get(url)
+    data = response.text
+    soup = BeautifulSoup(data,'html.parser')
 
-#Scraping all menu with categories
-category_list = []
-for j in soup.find_all('div', {"class":"section-header"}):
-    category = j.find('h2')
-    c = category.text.strip()
-    c = c.replace(" ", "")
-    if "(" in c:
-        c = c.replace("(", "")
-    if ")" in c:
-        c = c.replace(")", "")
-    category_list.append(c)
-allMenu = []
-count = 0
-for j in soup.find_all('div', {"class":"u-space-b3"}): 
-    menu = {}   
-    menu_name = []
-    menu_price = []
-    for i in j.find_all('div', {"class":"menu-item"}):
-        menu_item_name = i.find('h4')
-        m = menu_item_name.text.strip()
-        menu_name.append(m)
-        menu_item_price = i.find('div',{"class":"menu-item-prices"})
-        p = menu_item_price.text.strip()
-        menu_price.append(p)
-    data={'Menu_Name': menu_name, 'Menu_Prices': menu_price}
-    df=pd.DataFrame(data=data)
-    menu["Category"] = category_list[count]
-    menu["AllItems"] = df.to_dict("records")
-    allMenu.append(menu)
-    count += 1
-    if count == len(category_list): 
-        break
-print("------------------------------------------------------")
-print("Scraping Data")
-print({"IdUser" : IdUser, "FindKeyWord" : find, "Location": near, "RestaurantName": rest_name, "RestaurantMenu": allMenu})
-print("------------------------------------------------------")
+    ### Step 5 : Go to that link and retrieving data (Menu Name , Menu Price, categories)
+    # menu_name = []
+    # menu_price = []
 
-### Step 6 : Saving data in excel file
-# data={'Menu Name': menu_name, 'Menu Prices': menu_price}
-# df=pd.DataFrame(data=data)
-# df.index+=1
-# df.to_excel("yelp.xlsx")
+    # for j in soup.find_all('div', {"class":"menu-item"}):
+    #     menu_item_name = j.find('h4')
+    #     m = menu_item_name.text.strip()
+    #     menu_name.append(m)
+    #     menu_item_price = j.find('div',{"class":"menu-item-prices"})
+    #     p = menu_item_price.text.strip()
+    #     menu_price.append(p)
 
-### Inserting data into Monodb
-
-# l = list(restaurant.find({"IdUser": "nf", "FindKeyWord" : "Indian Food", "Location" : "Redondo Beach, CA", "RestaurantName" : "Spice Six"}))
-l = list(restaurant.find({"RestaurantName" : rest_name })) #Fetching
-if not l:  # if l is empty means no data found of restaurantName
-    restaurant.insert([{"IdUser" : IdUser, "FindKeyWord" : find, "Location": near, "RestaurantName": rest_name, "RestaurantMenu": allMenu}]) #For inserting data
-    print("Menu Inserted Successfully")
-else: # Update or Chcek already prent or not
-    restMenu = l[0]['RestaurantMenu']
-    Flag = 0
-    listFetchMenu = []
-    for x in restMenu:
-        if x is not None:
-            listFetchMenu.append(x['Category'])
-    listAllMenu = []
-    for x in allMenu:
-        if x is not None:
-            listAllMenu.append(x['Category'])
-    for x in listAllMenu:
-        if x not in listFetchMenu:
-            Flag = 1
-            restaurant.update_one({'_id':l[0]['_id']}, {"$set": {"RestaurantMenu": allMenu}})
-            print("Menu Updated.")
+    #Scraping all menu with categories
+    category_list = []
+    for j in soup.find_all('div', {"class":"section-header"}):
+        category = j.find('h2')
+        c = category.text.strip()
+        c = c.replace(" ", "")
+        if "(" in c:
+            c = c.replace("(", "")
+        if ")" in c:
+            c = c.replace(")", "")
+        category_list.append(c)
+    allMenu = []
+    count = 0
+    for j in soup.find_all('div', {"class":"u-space-b3"}): 
+        menu = {}   
+        menu_name = []
+        menu_price = []
+        for i in j.find_all('div', {"class":"menu-item"}):
+            menu_item_name = i.find('h4')
+            m = menu_item_name.text.strip()
+            menu_name.append(m)
+            menu_item_price = i.find('div',{"class":"menu-item-prices"})
+            p = menu_item_price.text.strip()
+            menu_price.append(p)
+        data={'Menu_Name': menu_name, 'Menu_Prices': menu_price}
+        df=pd.DataFrame(data=data)
+        menu["Category"] = category_list[count]
+        menu["AllItems"] = df.to_dict("records")
+        allMenu.append(menu)
+        count += 1
+        if count == len(category_list): 
             break
-    if Flag == 0:
-        print("Menu is already Present.")
-    else:
-        print("Menu Updated Successfully.")
-r = restaurant.find({"RestaurantName": rest_name})
-for x in r:
-    print(x)
+    print("------------------------------------------------------")
+    print("Scraping Data")
+    print({"IdUser" : IdUser, "FindKeyWord" : find, "Location": near, "RestaurantName": rest_name, "RestaurantMenu": allMenu})
+    print("------------------------------------------------------")
+
+    ### Step 6 : Saving data in excel file
+    # data={'Menu Name': menu_name, 'Menu Prices': menu_price}
+    # df=pd.DataFrame(data=data)
+    # df.index+=1
+    # df.to_excel("yelp.xlsx")
+
+    ### Inserting data into Monodb
+
+    # l = list(restaurant.find({"IdUser": "nf", "FindKeyWord" : "Indian Food", "Location" : "Redondo Beach, CA", "RestaurantName" : "Spice Six"}))
+    l = list(restaurant.find({"RestaurantName" : rest_name })) #Fetching
+    if not l:  # if l is empty means no data found of restaurantName
+        restaurant.insert([{"IdUser" : IdUser, "FindKeyWord" : find, "Location": near, "RestaurantName": rest_name, "RestaurantMenu": allMenu}]) #For inserting data
+        print("Menu Inserted Successfully")
+    else: # Update or Chcek already prent or not
+        restMenu = l[0]['RestaurantMenu']
+        Flag = 0
+        listFetchMenu = []
+        for x in restMenu:
+            if x is not None:
+                listFetchMenu.append(x['Category'])
+        listAllMenu = []
+        for x in allMenu:
+            if x is not None:
+                listAllMenu.append(x['Category'])
+        for x in listAllMenu:
+            if x not in listFetchMenu:
+                Flag = 1
+                restaurant.update_one({'_id':l[0]['_id']}, {"$set": {"RestaurantMenu": allMenu}})
+                print("Menu Updated.")
+                break
+        if Flag == 0:
+            print("Menu is already Present.")
+        else:
+            print("Menu Updated Successfully.")
+    r = restaurant.find({"RestaurantName": rest_name})
+    for x in r:
+        print("------------------------------------------------------")
+        print("Mongodb Data:")
+        print(x)
+        print("------------------------------------------------------")
+
+else:
+    print("Invalid Input!! Enter all Value(IdUser, Find Keyword, Near Location and Restaurant Name).")
