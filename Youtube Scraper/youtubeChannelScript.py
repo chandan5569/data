@@ -15,14 +15,16 @@ from time import sleep
 import csv
 import pymongo
 from bson.objectid import ObjectId
+import sys
 
 #Use Incognito mode when scraping
 chrome_options = Options()
 chrome_options.add_argument(" — incognito")
 browser = webdriver.Chrome(options=chrome_options)
 
-#Serach and getting the page data
-SearchWord = "cancer"
+#Search and getting the page data
+# SearchWord = "cancer"
+SearchWord = sys.argv[1] 
 url = "https://www.youtube.com/results?search_query=" + SearchWord
 browser.get(url)
 
@@ -74,7 +76,7 @@ client = pymongo.MongoClient('mongodb+srv://sumi:'+urllib.parse.quote_plus('sumi
 db = client.codemarket_shiraz #db
 YTData = db.youtubeScriptData #collection
 
-#Going thourgh all dict aAttribuue dict for retrieving all necessary data and saving it in CSV file
+#Going thourgh all dict aAttribuue dict for retrieving all necessary data and saving it in CSV file and into the db
 with open('YTScriptData.csv', mode='w') as csv_file:
     fieldnames = ['VideoTitle', 'VideoHref', 'ChannelName', 'ChannelHref', 'Links']
     writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
