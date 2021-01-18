@@ -26,6 +26,6 @@ RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 # copy code
-COPY /scraping.py  /home/ubuntu/docker_ec2/scraping.py
+COPY /scraping_yelp.py  /home/ubuntu/docker_ec2/scraping_yelp.py
 
-ENTRYPOINT ["python","scraping.py"]
+ENTRYPOINT ["python","scraping_yelp.py"]
