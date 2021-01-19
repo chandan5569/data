@@ -39,7 +39,8 @@ browser = webdriver.Chrome(r'/usr/local/bin/chromedriver', options=chrome_option
 print("Scrapping Started.")
 #Search and getting the page data
 # SearchWord = "cancer"
-SearchWord = sys.argv[1] 
+UserID = sys.argv[1] #taking user_id
+SearchWord = sys.argv[2] #taking SearchWord
 url = "https://www.youtube.com/results?search_query=" + SearchWord
 browser.get(url)
 
@@ -101,7 +102,7 @@ YTData = db.youtubeScriptData #collection
 
 #Going thourgh all dict aAttribuue dict for retrieving all necessary data and saving it in CSV file and into the db
 with open('YTScriptData.csv', mode='w') as csv_file:
-    fieldnames = ['VideoTitle', 'VideoHref', 'ChannelName', 'ChannelHref', 'Links']
+    fieldnames = ['UserID', 'SearchWord', 'VideoTitle', 'VideoHref', 'ChannelName', 'ChannelHref', 'Links']
     writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
     writer.writeheader()
     
@@ -119,8 +120,8 @@ with open('YTScriptData.csv', mode='w') as csv_file:
         sleep(1)
         #print(videoTitle, videoHref)
         #print(aboutLinks)
-        writer.writerow({'VideoTitle': videoTitle, 'VideoHref': videoHref, 'ChannelName': chanelName, 'ChannelHref':channelHref, 'Links':aboutLinks}) #inserting in csv file
-        YTData.insert({'VideoTitle': videoTitle, 'VideoHref': videoHref, 'ChannelName': chanelName, 'ChannelHref':channelHref, 'Links':aboutLinks}, check_keys=False) #Inserting in db
+        writer.writerow({'UserID': UserID, 'SearchWord': SearchWord, 'VideoTitle': videoTitle, 'VideoHref': videoHref, 'ChannelName': chanelName, 'ChannelHref':channelHref, 'Links':aboutLinks}) #inserting in csv file
+        YTData.insert({'UserID': UserID, 'SearchWord': SearchWord, 'VideoTitle': videoTitle, 'VideoHref': videoHref, 'ChannelName': chanelName, 'ChannelHref':channelHref, 'Links':aboutLinks}, check_keys=False) #Inserting in db
         print("-----One Document Inserted.------")
 print("Scrapping Stopped.")
 
