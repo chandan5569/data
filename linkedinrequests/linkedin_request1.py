@@ -74,7 +74,7 @@ def send_connection_requests():
     sleeps = [2,3,4]
     
 
-    pagination = url
+    pagination = driver.current_url
     count = 1
     page = 1
     while count <= limit:
