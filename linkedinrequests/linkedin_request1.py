@@ -21,22 +21,24 @@ def send_connection_requests():
     Email_id = sys.argv[1]
     Password = sys.argv[2]
     keyword = sys.argv[3]
-    message = sys.argv[4]
-    limit = int(sys.argv[5])
+    location = sys.argv[4]
+    message = sys.argv[5]
+    limit = int(sys.argv[6])
     sleeps = [2,3,4]
-    # print(Email_id)
-    # print(Password)
-    # print(keyword)
-    # print(message)
-    # print(limit)
+    print(Email_id)
+    print(Password)
+    print(keyword)
+    print(location)
+    print(message)
+    print(limit)
 
-    # PATH = r"C:\Users\BILAL\Projects\LinkedInScraper\chromedriver.exe"
-    PATH= r"/usr/local/bin/chromedriver"
+    PATH = r"C:\Users\BILAL\Projects\LinkedInScraper\chromedriver.exe"
+    # PATH= r"/usr/local/bin/chromedriver"
     chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument('--disable-dev-shm-usage')
+    # chrome_options.add_argument("--headless")
+    # chrome_options.add_argument("--no-sandbox")
+    # chrome_options.add_argument("--disable-gpu")
+    # chrome_options.add_argument('--disable-dev-shm-usage')
     driver = webdriver.Chrome(PATH,options=chrome_options)
 
     client = pymongo.MongoClient('mongodb+srv://bilalm:' + urllib.parse.quote_plus('Codemarket.123') + '@codemarket-staging.k16z7.mongodb.net/dreamjobpal?retryWrites=true&w=majority')
@@ -117,11 +119,27 @@ def send_connection_requests():
     container = driver.find_element_by_xpath("//button[@aria-label='Locations filter. Clicking this button displays all Locations filter options.']")
     container.click()
     time.sleep(random.choice(sleeps))
-    country = driver.find_element_by_xpath("//label[@aria-label='Filter by India']")
-    country.click()
-    time.sleep(random.choice(sleeps))
-    location = driver.find_elements_by_xpath("//div[@class='artdeco-hoverable-content__shell']//button[@aria-label='Apply selected filter and show results']")
-    location[1].click()
+
+    enter_location = driver.find_element_by_xpath("//input[@placeholder='Add a location']")
+    # enter_location
+    enter_location.send_keys(location)
+    time.sleep(5)
+
+    find_location = driver.find_element_by_xpath("//div[@role='listbox']")
+    print(find_location)
+    select_location = find_location.find_element_by_xpath("//div[@role='option']")
+    select_location.click()
+
+    select_location = driver.find_elements_by_xpath("//div[@class='artdeco-hoverable-content__shell']//button[@aria-label='Apply selected filter and show results']")
+    select_location[1].click()
+
+
+
+    # country = driver.find_element_by_xpath("//label[@aria-label='Filter by India']")
+    # country.click()
+    # time.sleep(random.choice(sleeps))
+    # location = driver.find_elements_by_xpath("//div[@class='artdeco-hoverable-content__shell']//button[@aria-label='Apply selected filter and show results']")
+    # location[1].click()
     time.sleep(random.choice(sleeps))
 
     url = driver.current_url
@@ -186,10 +204,11 @@ def send_connection_requests():
                 except:
                     print("Connection request already sent...")
 #                     traceback.print_exc()
+            
             driver.execute_script("window.scrollTo(0, " + str(i) + ")")
             if i + 125 < length: #increasing for scroll length
                 i += 125
         print(page)
         page +=1
-
+    print("All requests sent")
 send_connection_requests()
