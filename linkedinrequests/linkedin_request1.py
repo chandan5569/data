@@ -204,11 +204,12 @@ def send_connection_requests():
                 except:
                     print("Connection request already sent...")
 #                     traceback.print_exc()
-            
+            else:
+                break
             driver.execute_script("window.scrollTo(0, " + str(i) + ")")
             if i + 125 < length: #increasing for scroll length
                 i += 125
-        print(page)
+        # print(page)
         page +=1
     print("All requests sent")
 send_connection_requests()
