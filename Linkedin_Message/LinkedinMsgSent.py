@@ -12,7 +12,6 @@ from time import sleep
 
 driver = webdriver.Chrome()
 chrome_options = Options()
-sleeps = [2,3,4]
 
 #Taking Input
 # EmailId = 'donnybegins@gmail.com'
@@ -103,7 +102,7 @@ except:
 
 '''
 Output :
-$ python LinkedinMsgSent.py donnybegins@gmail.com myaccount "Kiran Virani" "Thanks :)"
+$ python LinkedinMsgSent.py youremail@gmail.com yourpassword "Kiran Virani" "Thanks :)"
 Login...
 Chat Window is already Opened...
 15
