@@ -10,8 +10,13 @@ import traceback
 from time import sleep
 # from selenium.webdriver import ActionChains
 
-driver = webdriver.Chrome()
+#Uisng Chrome browser
 chrome_options = Options()
+chrome_options.add_argument(" — incognito")
+chrome_options.add_argument('--headless')
+chrome_options.add_argument("--disable-dev-shm-usage")
+chrome_options.add_argument("--no-sandbox")
+driver = webdriver.Chrome(r'/usr/local/bin/chromedriver', options=chrome_options)
 
 #Taking Input
 # EmailId = 'donnybegins@gmail.com'
@@ -21,10 +26,10 @@ EmailId = sys.argv[1]
 Password = sys.argv[2]
 
 # UserName = "Sunny Tarawade"
-UserName = sys.argv[3]
+#UserName = sys.argv[3]
 
 # MessageSend = 'Thanks :)'
-MessageSend = sys.argv[4]
+MessageSend = sys.argv[3]
 
 #Sign in into linked account
 driver.get("https://www.linkedin.com/login")
@@ -70,31 +75,34 @@ try:
         #print(divTag)
         sleep(2)
         UserDiv = driver.find_element_by_xpath(divTag)
-        #Finding user name
-        if UserDiv.text == UserName:
-            print("Name : ", UserDiv.text)
-            Flag = 1
-            print("Name Found...")
+        print("Name : ", UserDiv.text)
 
-            #Clicking on user name
-            UserDiv.click()
+        #if UserDiv.text == UserName:
+        #Flag = 1
+        #print("Name Found...")
 
-            #Finding p tag to click and enter msg
-            sleep(2)
-            pTagMsg = driver.find_element_by_xpath("//*[@id='msg-overlay']/div[2]/div[1]/form/div[3]/div/div/div/p")
-            #print(pTagMsg) 
-            sleep(2)
-            pTagMsg.click()
-            pTagMsg.send_keys(MessageSend)
+        #Clicking on user name
+        UserDiv.click()
 
-            #Finding send button
-            send = driver.find_element_by_xpath("//*[@id='msg-overlay']/div[2]/div[1]/form/footer/div[2]/div/button")
-            send.click()
-            print("Message Sent...")
-            break
+        #Finding p tag to click and enter msg
+        sleep(2)
+        pTagMsg = driver.find_element_by_xpath("//*[@id='msg-overlay']/div[2]/div[1]/form/div[3]/div/div/div/p")
+        #print(pTagMsg) 
+        sleep(2)
+        pTagMsg.click()
+        pTagMsg.send_keys(MessageSend)
 
-    if(Flag == 0):
-        print("Name Not Found ! Enter correct Name.")
+        #Finding send button
+        send = driver.find_element_by_xpath("//*[@id='msg-overlay']/div[2]/div[1]/form/footer/div[2]/div/button")
+        send.click()
+        print("Message Sent...")
+
+        #For closing window
+        miniWindow = driver.find_element_by_xpath("//*[@id='msg-overlay']/div[2]/header/section[2]/button[2]")
+        miniWindow.click()
+
+    # if(Flag == 0):
+    #     print("Name Not Found ! Enter correct Name.")
     #     //*[@id="msg-overlay"]/div[1]/section/div/div[1]/div[1]/div/div[2]/div/div[1]/h4
 except:
     print("Error Occured...")
@@ -102,12 +110,13 @@ except:
 
 '''
 Output :
-$ python LinkedinMsgSent.py youremail@gmail.com yourpassword "Kiran Virani" "Thanks :)"
+$ python LinkedinMsgSent.py youremailid@gmail.com yourpass "Thanks For connecting"
 Login...
 Chat Window is already Opened...
-15
-Name :  Kiran Virani
-Name Found...
+2
+Name :  Donny Koay
+Message Sent...
+Name :  Nooras Fatima Ansari
 Message Sent...
 
 '''
