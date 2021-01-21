@@ -20,8 +20,8 @@ chrome_options.add_argument(" — incognito")
 chrome_options.add_argument('--headless')
 chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--no-sandbox")
-# driver = webdriver.Chrome(r'/usr/local/bin/chromedriver', options=chrome_options)
-driver = webdriver.Chrome(options=chrome_options)
+driver = webdriver.Chrome(r'/usr/local/bin/chromedriver', options=chrome_options)
+#driver = webdriver.Chrome(options=chrome_options)
 
 #Taking Input
 # EmailId = 'donnybegins@gmail.com'
@@ -37,6 +37,7 @@ Password = sys.argv[2]
 MessageSend = sys.argv[3]
 
 Limit = int(sys.argv[4])
+
 print(EmailId, " ", Password, " ", MessageSend, " ", Limit)
 
 #DB connection
@@ -44,9 +45,7 @@ client = pymongo.MongoClient('mongodb+srv://sumi:'+urllib.parse.quote_plus('sumi
 db = client.codemarket_shiraz #db
 otp_collection = db.OTP_linkedin #collection
 
-
-#challenge/AgFXl5GhM3Yu-AAAAXcjYRVOXQ1W6sE0jHWKUPxYk9s2SHi_OVXAqE81cqRKJHmuy7W_ke3htu1rCcwgsLAHzMmD2TScSQ?ut=1vd69TEFY-M9A1
-
+#OTP 
 def otp():
     print("Linkedin sent you an OTP to your email.")
     otp_collection.insert({"linkedin_login_url": EmailId, "Status":"OTP sent"})
@@ -88,21 +87,22 @@ def otp():
         print("Session Expired try login again...")
         LinkedInMsg()
     print("No return...")
-
-#For Opening chat window
-def chatWindow():
+  
+#For checking window is closed or not
+def chatWindowClose():
     try:
-        sleep(2)
         chatOpen = driver.find_element_by_xpath("//*[@id='msg-overlay']/div[1]/div")
-        print("Chat Window is already Opened...")
+        if chatOpen:
+            chatClose = driver.find_element_by_xpath("(//*[@id='msg-overlay']/div[1]/header/section[1])")
+            chatClose.click()
+            print("Chatbox Closed...")
+            return True
     except:
-        sleep(2)
-        print("Chat Window is closed...")
-        chatClose = driver.find_element_by_xpath("(//*[@id='msg-overlay']/div[1]/header/section[1])")
-        chatClose.click()
-        print("Chat Window Opened...")
+        print("Chatbox is already closed")
+        return True
 
 def LinkedInMsg():
+
     #Sign in into linked account
     driver.get("https://www.linkedin.com/login")
     driver.find_element_by_id("username").send_keys(EmailId)
@@ -130,76 +130,112 @@ def LinkedInMsg():
     else:
         print("Something is wrong!! Try again!! Network Problem!!")
         print(driver.current_url)
+
     #Finding 
     try:
-        # Checking chat window in open or not
-        chatWindow()
+        chatWindowClose()
         sleep(2)
-
-        #all chat message div element
-        allChatMessage = driver.find_element_by_xpath("//*[@id='msg-overlay']/div[1]/section/div/div[1]")
-        print(len(allChatMessage.find_elements_by_xpath("./div")))
-
+        driver.get("https://www.linkedin.com/search/results/people/?network=%5B%22F%22%5D&origin=MEMBER_PROFILE_CANNED_SEARCH")
+        sleep(3)
+        #divelement = driver.find_element_by_xpath("/html/body/div[8]/div[3]/div/div[2]/div/div[2]/div/div[2]/ul")
+        divelement = driver.find_element_by_xpath("//*[@class='pv2 artdeco-card ph0 mb2']/ul")
+        sleep(2)
         #Setting Limit
-        TotalMsgLength = len(allChatMessage.find_elements_by_xpath("./div"))
+        TotalMsgLength = len(divelement.find_elements_by_xpath("./li"))
         if Limit > TotalMsgLength:
             finalLimit = TotalMsgLength
         else:
             finalLimit = Limit
 
-        #Going throw loop to find user
+        #Going through all loop
         for x in range(finalLimit):
-            divTag = "//*[@id='msg-overlay']/div[1]/section/div/div[1]/div[" + str(x+1) + "]/div/div[2]/div/div[1]/h4"
-            #print(divTag)
+            y = "//*[@class='pv2 artdeco-card ph0 mb2']/ul/li[" + str(x+1) + "]/div/div/div[3]/button"
+            #y = "/html/body/div[8]/div[3]/div/div[2]/div/div[2]/div/div[2]/ul/li[" + str(x+1) + "]/div/div/div[3]/button"
+            btn = driver.find_element_by_xpath(y)
             sleep(2)
-            UserDiv = driver.find_element_by_xpath(divTag)
-            print("Name : ", UserDiv.text)
+            print(btn.text)
+            if btn.text == "Message":
+                btn.click()
+                sleep(2)
+                
+                msg = driver.find_element_by_xpath("//*[@id='msg-overlay']/div[2]/div[1]/form/div[3]/div/div/div/p")
+                #print(msg) #//*[@id="ember749"]/div/div[1]/div[1]/p
+                msg.click()
+                msg.send_keys(MessageSend)
+                print(MessageSend, len(MessageSend))
+                sleep(2)
+                
+                send = driver.find_element_by_xpath("//*[@id='msg-overlay']/div[2]/div[1]/form/footer/div[2]/div/button")
+                send.click()
+                #print(send.click())
+                print("Message Sent...")
+                sleep(1)
 
-            #if UserDiv.text == UserName:
-            #Flag = 1
-            #print("Name Found...")
-
-            #Clicking on user name
-            UserDiv.click()
-
-            #Finding p tag to click and enter msg
-            sleep(2)
-            pTagMsg = driver.find_element_by_xpath("//*[@id='msg-overlay']/div[2]/div[1]/form/div[3]/div/div/div/p")
-            #print(pTagMsg) 
-            sleep(2)
-            pTagMsg.click()
-            pTagMsg.send_keys(MessageSend)
-            print("Ptag : ", pTagMsg)
-            #Finding send button
-            send = driver.find_element_by_xpath("//*[@id='msg-overlay']/div[2]/div[1]/form/footer/div[2]/div/button")
-            send.click()
-            print("Send : ", send)
-            print("Message Sent...")
-
-            #For closing window
-            miniWindow = driver.find_element_by_xpath("//*[@id='msg-overlay']/div[2]/header/section[2]/button[2]")
-            miniWindow.click()
-            print("Mini Window: ", miniWindow)
+                smallBox = driver.find_element_by_xpath("//*[@id='msg-overlay']/div[2]/header/section[2]/button[2]")
+                smallBox.click()
         print("Script Stopped running...")
-        # if(Flag == 0):
-        #     print("Name Not Found ! Enter correct Name.")
-        #     //*[@id="msg-overlay"]/div[1]/section/div/div[1]/div[1]/div/div[2]/div/div[1]/h4
     except:
         print("Error Occured...")
         traceback.print_exc()
 
 LinkedInMsg()
 
+#Msg sent from chat window
+
+#For Opening chat window
+# def chatWindow():
+#     try:
+#         sleep(2)
+#         chatOpen = driver.find_element_by_xpath("//*[@id='msg-overlay']/div[1]/div")
+#         print("Chat Window is already Opened...")
+#     except:
+#         sleep(2)
+#         print("Chat Window is closed...")
+#         chatClose = driver.find_element_by_xpath("(//*[@id='msg-overlay']/div[1]/header/section[1])")
+#         chatClose.click()
+#         print("Chat Window Opened...")
+  
+# Checking chat window in open or not
+#chatWindow()
+#all chat message div element
+# allChatMessage = driver.find_element_by_xpath("//*[@id='msg-overlay']/div[1]/section/div/div[1]")
+# print(len(allChatMessage.find_elements_by_xpath("./div")))
+
+#Going through loop to find user
+# for x in range(finalLimit):
+#     divTag = "//*[@id='msg-overlay']/div[1]/section/div/div[1]/div[" + str(x+1) + "]/div/div[2]/div/div[1]/h4"
+#     #print(divTag)
+#     sleep(2)
+#     UserDiv = driver.find_element_by_xpath(divTag)
+#     print("Name : ", UserDiv.text)
+
+#     #if UserDiv.text == UserName:
+#     #Flag = 1
+#     #print("Name Found...")
+
+#     #Clicking on user name
+#     UserDiv.click()
+
+#     #Finding p tag to click and enter msg
+#     sleep(2)
+#     pTagMsg = driver.find_element_by_xpath("//*[@id='msg-overlay']/div[2]/div[1]/form/div[3]/div/div/div/p")
+#     #print(pTagMsg) 
+#     sleep(2)
+#     pTagMsg.click()
+#     pTagMsg.send_keys(MessageSend)
+#     print("Ptag : ", pTagMsg, MessageSend)
+#     #Finding send button
+#     sleep(2)
+#     send = driver.find_element_by_xpath("//*[@id='msg-overlay']/div[2]/div[1]/form/footer/div[2]/div/button")
+#     send.click()
+#     print("Send : ", send)
+#     print("Message Sent...")
+
+#     #For closing window
+#     miniWindow = driver.find_element_by_xpath("//*[@id='msg-overlay']/div[2]/header/section[2]/button[2]")
+#     miniWindow.click()
+#     print("Mini Window: ", miniWindow)
 
 '''
-Output :
-$ python LinkedinMsgSent.py youremailid@gmail.com yourpass "Thanks For connecting"
-Login...
-Chat Window is already Opened...
-2
-Name :  Donny Koay
-Message Sent...
-Name :  Nooras Fatima Ansari
-Message Sent...
-
+Input: python LinkedinMsgSent.py email@gmail.com password "Message" 2
 '''
