@@ -25,12 +25,12 @@ def send_connection_requests():
     message = sys.argv[5]
     limit = int(sys.argv[6])
     sleeps = [2,3,4]
-    print(Email_id)
-    print(Password)
-    print(keyword)
-    print(location)
-    print(message)
-    print(limit)
+    # print(Email_id)
+    # print(Password)
+    # print(keyword)
+    # print(location)
+    # print(message)
+    # print(limit)
 
     PATH = r"C:\Users\BILAL\Projects\LinkedInScraper\chromedriver.exe"
     # PATH= r"/usr/local/bin/chromedriver"
@@ -92,16 +92,16 @@ def send_connection_requests():
     time.sleep(random.choice(sleeps))
     password.send_keys(Password)
     password.send_keys(Keys.RETURN)
-    print('Login...')
+    
 
     
     if 'https://www.linkedin.com/checkpoint' in driver.current_url:
         otp()
-
+    print('Login...')
     
     my_db.linkedin_otp.drop()
 
-    #Search Mern
+    #Search keyword
     # driver.get("https://www.linkedin.com/feed/")
     chatWindow()
     search = driver.find_element_by_class_name("search-global-typeahead__input ")
@@ -133,20 +133,12 @@ def send_connection_requests():
     select_location = driver.find_elements_by_xpath("//div[@class='artdeco-hoverable-content__shell']//button[@aria-label='Apply selected filter and show results']")
     select_location[1].click()
 
-
-
-    # country = driver.find_element_by_xpath("//label[@aria-label='Filter by India']")
-    # country.click()
-    # time.sleep(random.choice(sleeps))
-    # location = driver.find_elements_by_xpath("//div[@class='artdeco-hoverable-content__shell']//button[@aria-label='Apply selected filter and show results']")
-    # location[1].click()
     time.sleep(random.choice(sleeps))
 
     url = driver.current_url
     pagination = url
     count = 1
     page = 1
-    # limit = 5
     
     while count <= limit:
         chatWindow()
