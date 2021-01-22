@@ -10,7 +10,10 @@ import traceback
 from time import sleep
 import urllib.parse
 import pymongo
+import ast
 # from selenium.webdriver import ActionChains
+
+#Input : python LinkedinMsgSent.py email@gmail.com password HelloWorld "['https://www.linkedin.com/in/nooras-fatima-ansari-2542b3171/', 'https://www.linkedin.com/in/daniel-piersch-ba003b71/'] 0
 
 print("Script Started running...")
 
@@ -21,7 +24,7 @@ chrome_options.add_argument('--headless')
 chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--no-sandbox")
 driver = webdriver.Chrome(r'/usr/local/bin/chromedriver', options=chrome_options)
-#driver = webdriver.Chrome(options=chrome_options)
+# driver = webdriver.Chrome(options=chrome_options)
 
 #Taking Input
 # EmailId = 'donnybegins@gmail.com'
@@ -36,9 +39,11 @@ Password = sys.argv[2]
 # MessageSend = 'Thanks :)'
 MessageSend = sys.argv[3]
 
-Limit = int(sys.argv[4])
+url = ast.literal_eval(sys.argv[4])
 
-print(EmailId, " ", Password, " ", MessageSend, " ", Limit)
+Limit = int(sys.argv[5])
+
+print(EmailId, " ", Password, " ", MessageSend, " ", url, " ", Limit)
 
 #DB connection
 client = pymongo.MongoClient('mongodb+srv://sumi:'+urllib.parse.quote_plus('sumi@123')+'@codemarket-staging.k16z7.mongodb.net/codemarket_shiraz?retryWrites=true&w=majority')
@@ -132,48 +137,77 @@ def LinkedInMsg():
         print(driver.current_url)
 
     #Finding 
-    try:
-        chatWindowClose()
-        sleep(2)
-        driver.get("https://www.linkedin.com/search/results/people/?network=%5B%22F%22%5D&origin=MEMBER_PROFILE_CANNED_SEARCH")
-        sleep(3)
-        #divelement = driver.find_element_by_xpath("/html/body/div[8]/div[3]/div/div[2]/div/div[2]/div/div[2]/ul")
-        divelement = driver.find_element_by_xpath("//*[@class='pv2 artdeco-card ph0 mb2']/ul")
-        sleep(2)
-        #Setting Limit
-        TotalMsgLength = len(divelement.find_elements_by_xpath("./li"))
-        if Limit > TotalMsgLength:
-            finalLimit = TotalMsgLength
-        else:
-            finalLimit = Limit
-
-        #Going through all loop
-        for x in range(finalLimit):
-            y = "//*[@class='pv2 artdeco-card ph0 mb2']/ul/li[" + str(x+1) + "]/div/div/div[3]/button"
-            #y = "/html/body/div[8]/div[3]/div/div[2]/div/div[2]/div/div[2]/ul/li[" + str(x+1) + "]/div/div/div[3]/button"
-            btn = driver.find_element_by_xpath(y)
+    try: 
+        if Limit == 0 and url:
+            for x in url:
+                driver.get(x)
+                sleep(2)
+                chatWindowClose()
+                try:
+                    sleep(2)
+                    element = "//*[@class='display-flex justify-flex-end align-items-center']/div/div[1]/a"
+                    btn = driver.find_element_by_xpath(element)
+                    #print(btn.text)
+                    sleep(2)
+                    if btn.text == "Message":
+                        sleep(2)
+                        btn.click()
+                        sleep(2)
+                        msg = driver.find_element_by_xpath("//*[@id='msg-overlay']/div[2]/div[1]/form/div[3]/div/div/div/p")
+                        msg.click()
+                        sleep(2)
+                        msg.send_keys(MessageSend)
+                        sleep(2)
+                        send = driver.find_element_by_xpath("//*[@id='msg-overlay']/div[2]/div[1]/form/footer/div[2]/div/button")
+                        send.click()
+                        print("Message Sent...")
+                        smallBox = driver.find_element_by_xpath("//*[@id='msg-overlay']/div[2]/header/section[2]/button[2]")
+                        smallBox.click()
+                        print("Connection Found")
+                except:
+                    print("Connection is not connected")
+        elif Limit > 0 and not len(url):
+            chatWindowClose()
             sleep(2)
-            print(btn.text)
-            if btn.text == "Message":
-                btn.click()
-                sleep(2)
-                
-                msg = driver.find_element_by_xpath("//*[@id='msg-overlay']/div[2]/div[1]/form/div[3]/div/div/div/p")
-                #print(msg) #//*[@id="ember749"]/div/div[1]/div[1]/p
-                msg.click()
-                msg.send_keys(MessageSend)
-                print(MessageSend, len(MessageSend))
-                sleep(2)
-                
-                send = driver.find_element_by_xpath("//*[@id='msg-overlay']/div[2]/div[1]/form/footer/div[2]/div/button")
-                send.click()
-                #print(send.click())
-                print("Message Sent...")
-                sleep(1)
+            driver.get("https://www.linkedin.com/search/results/people/?network=%5B%22F%22%5D&origin=MEMBER_PROFILE_CANNED_SEARCH")
+            sleep(3)
+            #divelement = driver.find_element_by_xpath("/html/body/div[8]/div[3]/div/div[2]/div/div[2]/div/div[2]/ul")
+            divelement = driver.find_element_by_xpath("//*[@class='pv2 artdeco-card ph0 mb2']/ul")
+            sleep(2)
+            #Setting Limit
+            TotalMsgLength = len(divelement.find_elements_by_xpath("./li"))
+            if Limit > TotalMsgLength:
+                finalLimit = TotalMsgLength
+            else:
+                finalLimit = Limit
 
-                smallBox = driver.find_element_by_xpath("//*[@id='msg-overlay']/div[2]/header/section[2]/button[2]")
-                smallBox.click()
-        print("Script Stopped running...")
+            #Going through all loop
+            for x in range(finalLimit):
+                y = "//*[@class='pv2 artdeco-card ph0 mb2']/ul/li[" + str(x+1) + "]/div/div/div[3]/button"
+                #y = "/html/body/div[8]/div[3]/div/div[2]/div/div[2]/div/div[2]/ul/li[" + str(x+1) + "]/div/div/div[3]/button"
+                btn = driver.find_element_by_xpath(y)
+                sleep(2)
+                print(btn.text)
+                if btn.text == "Message":
+                    btn.click()
+                    sleep(2)
+                    
+                    msg = driver.find_element_by_xpath("//*[@id='msg-overlay']/div[2]/div[1]/form/div[3]/div/div/div/p")
+                    #print(msg) #//*[@id="ember749"]/div/div[1]/div[1]/p
+                    msg.click()
+                    msg.send_keys(MessageSend)
+                    print(MessageSend, len(MessageSend))
+                    sleep(2)
+                    
+                    send = driver.find_element_by_xpath("//*[@id='msg-overlay']/div[2]/div[1]/form/footer/div[2]/div/button")
+                    send.click()
+                    #print(send.click())
+                    print("Message Sent...")
+                    sleep(1)
+
+                    smallBox = driver.find_element_by_xpath("//*[@id='msg-overlay']/div[2]/header/section[2]/button[2]")
+                    smallBox.click()
+            print("Script Stopped running...")
     except:
         print("Error Occured...")
         traceback.print_exc()
