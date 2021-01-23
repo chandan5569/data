@@ -1,3 +1,4 @@
+
 from selenium import webdriver
 from bs4 import BeautifulSoup
 import os,random,time,argparse
@@ -5,6 +6,8 @@ from bs4 import BeautifulSoup as bs
 import csv
 import re
 import bs4
+import pymongo
+from pymongo import MongoClient
 
 
 parser = argparse.ArgumentParser()
@@ -38,7 +41,7 @@ while True:
      new_height = browser.execute_script("return document.body.scrollHeight")
      if new_height == total_height:
         break
-     last_height = new_height
+     total_height = new_height
 
 page = bs(browser.page_source, features="html.parser")
 content = page.find_all('a', {'class':"mn-connection-card__link ember-view"})
@@ -56,14 +59,14 @@ edu_details1 = ["Education"]
 name5 = ["Name"]
 # Connect to the profile of all contacts and save the email within a list
 for contact in mynetwork:
-    browser.get("https://www.linkedin.com" + contact)
+    browser.get("https://www.linkedin.com" + contact + "detail/contact-info/")
     browser.implicitly_wait(3)
     src = browser.page_source
     soup = bs4.BeautifulSoup(src,'html.parser')
     name_div = soup.find('div',{'class':'flex-1 mr5'})
     name_loc = name_div.find_all('ul')
     name = name_loc[0].find('li').get_text().strip()
-    print(name)
+    #print(name)
     name5.append(name)
 
 #exp section
@@ -73,29 +76,39 @@ for contact in mynetwork:
         exp1 = exp.find('ul')
         li_tag = exp1.find('div')
         a_tag = li_tag.find('a')
-        job_title = a_tag.find('h3').get_text().strip()
-        exp_deatails.append(job_title)
-        company_name = a_tag.find_all('p')[1].get_text().strip()
-        exp_deatails.append(company_name)
-        j_date = a_tag.find_all('h4')[0].find_all('span')[1].get_text().strip()
-        exp_deatails.append(j_date)
-        e_date = a_tag.find_all('h4')[1].find_all('span')[1].get_text().strip()
-        exp_deatails.append(e_date)
+        if a_tag.find('h3'):
+            job_title = a_tag.find('h3').get_text().strip()
+            exp_deatails.append(job_title)
+        if len(a_tag.find_all('p'))>1 and a_tag.find_all('p'):
+            company_name = a_tag.find_all('p')[1].get_text().strip()
+            exp_deatails.append(company_name)
+        if a_tag.find_all('h4')[0].find_all('span')[1]:
+            j_date = a_tag.find_all('h4')[0].find_all('span')[1].get_text().strip()
+            exp_deatails.append(j_date)
+        if len(a_tag.find_all('h4'))>1 and a_tag.find_all('h4'):
+            e_date = a_tag.find_all('h4')[1].find_all('span')[1].get_text().strip()
+            exp_deatails.append(e_date)
         exp_deatails1.append(exp_deatails)
     else:
         exp_deatails1.append("Detail Not Found!")
+
+
     #education section
     edu_details = []
     edu_section = soup.find('section',{'id','education-section'})
-    if edu_section:
-        clg_name = edu_section.find('h3').get_text().strip()
-        edu_details.append(clg_name)
-        degree_name = edu_section.find('p',{'class':"pv-entity__secondary-title pv-entity__degree-name t-14 t-black t-normal"}).find_all('span')[1].get_text().strip()
-        edu_details.append(degree_name)
-        stream_name = edu_section.find('p',{'class':"pv-entity__secondary-title pv-entity__fos t-14 t-black t-normal"}).find_all('span')[1].get_text().strip()
-        edu_details.append(stream_name)
-        degree_year = edu_section.find('p',{"class":"pv-entity__dates t-14 t-black--light t-normal"}).find_all('span')[1].get_text().strip()
-        edu_details.append(degree_year)
+    if edu_section is not None:
+        if edu_section.find('h3'):
+            clg_name = edu_section.find('h3').get_text().strip()
+            edu_details.append(clg_name)
+        if edu_section.find('p',{'class':"pv-entity__secondary-title pv-entity__degree-name t-14 t-black t-normal"}):
+            degree_name = edu_section.find('p',{'class':"pv-entity__secondary-title pv-entity__degree-name t-14 t-black t-normal"}).find_all('span')[1].get_text().strip()
+            edu_details.append(degree_name)
+        if edu_section.find('p',{'class':"pv-entity__secondary-title pv-entity__fos t-14 t-black t-normal"}):
+            stream_name = edu_section.find('p',{'class':"pv-entity__secondary-title pv-entity__fos t-14 t-black t-normal"}).find_all('span')[1].get_text().strip()
+            edu_details.append(stream_name)
+        if edu_section.find('p',{"class":"pv-entity__dates t-14 t-black--light t-normal"}):
+                degree_year = edu_section.find('p',{"class":"pv-entity__dates t-14 t-black--light t-normal"}).find_all('span')[1].get_text().strip()
+                edu_details.append(degree_year)
         edu_details1.append(edu_details)
     else:
         edu_details1.append("Detail Not Found!")
@@ -116,14 +129,24 @@ for contact in mynetwork:
         #print(name.get('href'))
         linkedin_link.append(name.get('href'))
     time.sleep(random.uniform(0.5, 1.9))
-
+mongo_list = []
 with open(f'network_emails.csv', 'w') as f:
     writer = csv.writer(f)
     email=0
     while email<len(my_network_emails):
+            all_details = {}
             writer.writerow([name5[email],my_network_emails[email],linkedin_link[email],exp_deatails1[email],edu_details1[email]])
+            all_details['name']=name5[email]
+            all_details["email"]=my_network_emails[email]
+            all_details["linkedin_link"]=linkedin_link[email]
+            all_details["experience_details"]=exp_deatails1[email]
+            all_details["education_details"]=edu_details1[email]
+            mongo_list.append(all_details)
             email+=1
-
+client = pymongo.MongoClient("mongodb+srv://saurabhj:Codemarket.123@codemarket-staging.k16z7.mongodb.net/saurabhj?retryWrites=true&w=majority")
+mydb = client["saurabhj"]
+db = mydb["linkedin_scrapping"]
+x = db.insert_many(mongo_list)
 
 
     
