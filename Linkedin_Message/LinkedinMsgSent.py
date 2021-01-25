@@ -20,11 +20,12 @@ print("Script Started running...")
 #Uisng Chrome browser
 chrome_options = Options()
 chrome_options.add_argument(" — incognito")
-chrome_options.add_argument('--headless')
-chrome_options.add_argument("--disable-dev-shm-usage")
-chrome_options.add_argument("--no-sandbox")
-driver = webdriver.Chrome(r'/usr/local/bin/chromedriver', options=chrome_options)
-# driver = webdriver.Chrome(options=chrome_options)
+chrome_options.add_argument("--window-size=1920,1200");
+# chrome_options.add_argument('--headless')
+# chrome_options.add_argument("--disable-dev-shm-usage")
+# chrome_options.add_argument("--no-sandbox")
+# driver = webdriver.Chrome(r'/usr/local/bin/chromedriver', options=chrome_options)
+driver = webdriver.Chrome(options=chrome_options)
 
 #Taking Input
 # EmailId = 'donnybegins@gmail.com'
@@ -36,12 +37,25 @@ Password = sys.argv[2]
 # UserName = "Sunny Tarawade"
 #UserName = sys.argv[3]
 
+# KeyWord = "python"
+KeyWord = sys.argv[3]
+
+# Geography = "India"
+Geography = sys.argv[4]
+
+# Relationship = "2 3"
+Relationship = sys.argv[5]
+Relationship = Relationship.split() #Converting string into list Relationship -> ['2', '3']
+
+# Subject = "Job Offer"
+Subject = sys.argv[6]
+
 # MessageSend = 'Thanks :)'
-MessageSend = sys.argv[3]
+MessageSend = sys.argv[7]
 
-url = ast.literal_eval(sys.argv[4])
+url = ast.literal_eval(sys.argv[8])
 
-Limit = int(sys.argv[5])
+Limit = int(sys.argv[9])
 
 print(EmailId, " ", Password, " ", MessageSend, " ", url, " ", Limit)
 
@@ -138,6 +152,126 @@ def LinkedInMsg():
 
     #Finding 
     try: 
+        # Python Script That Sends Messages To 2nd & 3rd Degree Connections (Geography +) In Linkedin Sales Navigator
+        if KeyWord and Geography and Relationship and Subject and MessageSend and Limit:
+
+            #Linkedin Sales Navigator
+            driver.get('https://www.linkedin.com/sales/homepage')
+
+            #KeyWord
+            sleep(2)
+            searchBar = driver.find_element_by_xpath("//*[@id='global-typeahead-search-input']")
+            sleep(3)
+            searchBar.click()
+            sleep(3)
+            searchBar.send_keys(KeyWord)
+            sleep(2)
+            searchBar.send_keys(Keys.RETURN)
+            print("-- Keyord is selected --")
+
+            #Geography and Relationship
+            ul = driver.find_element_by_xpath("//*[@class='search-filter__list collapsible-container is-expanded ember-view']")
+            for x in range(1,len(ul.find_elements_by_xpath("./li"))-1):
+                divLi = driver.find_element_by_xpath("//*[@class='search-filter__list collapsible-container is-expanded ember-view']/li[" + str(x+1) + "]/div/div/div/div/div")
+                #print(divLi.text)
+
+                #For Geaography
+                if divLi.text == "Geography":
+                    buttonLi = driver.find_element_by_xpath("//*[@class='search-filter__list collapsible-container is-expanded ember-view']/li[" + str(x+1) + "]/div/div/div/div/button")
+                    buttonLi.click()
+                    sleep(2)
+                    inputLi = driver.find_element_by_xpath("//*[@class='search-filter__list collapsible-container is-expanded ember-view']/li[" + str(x+1) + "]/div/div/div[2]/input")
+                    inputLi.send_keys(Geography)
+                    #inputLi.send_keys('India')
+                    sleep(2)
+                    inputLiOl = driver.find_element_by_xpath("//*[@class='search-filter-typeahead__list overflow-y-auto']/li[1]/button")
+                    inputLiOl.click() 
+                    sleep(2)
+                    print("-- Geography Selected --")
+                    
+                #For relationship
+                if divLi.text == "Relationship":
+                    buttonLi = driver.find_element_by_xpath("//*[@class='search-filter__list collapsible-container is-expanded ember-view']/li[" + str(x+1) + "]/div/div/div/div/button")
+                    buttonLi.click()
+                    sleep(2)
+                    inputLiOl = driver.find_element_by_xpath("//*[@class='search-filter-typeahead__list overflow-y-auto']")
+                    for r in Relationship:
+                        for li in range(len(inputLiOl.find_elements_by_xpath("./li"))):
+                            buttonRelationship = driver.find_element_by_xpath("//*[@class='search-filter-typeahead__list overflow-y-auto']/li["+str(li+1)+"]/button")
+                            if str(r) in buttonRelationship.text:
+                                buttonRelationship.click()
+                                sleep(2)
+                                print("-- Relationship Selected --")
+                                #print("yess", buttonRelationship.text)
+                                break
+            
+            ol = driver.find_element_by_xpath("//*[@class='search-results__result-list']")
+            sleep(2)
+            try:
+                count = 0
+                page = 1
+                while count < Limit:
+                    print("Message sending is in progress...")
+                    length = driver.execute_script("return document.documentElement.scrollHeight")
+                    scrollLength = 200
+                    for x in ol.find_elements_by_xpath("./li"):
+                        #print(x)
+                        try:
+                            y = x.find_element_by_xpath("div[2]/div/div/div/article/section[1]/div[2]/ul/li/div/div[2]")
+                            y.click()
+                            sleep(2)
+                            messagediv = x.find_element_by_xpath("div[2]/div/div/div/article/section[1]/div[2]/ul/li/div/div[2]/div/div/div/div/ul")
+                            #print(len(messagediv.find_elements_by_xpath("./li")))
+                            for m in messagediv.find_elements_by_xpath("./li"):
+                                #print("Hii")
+                                if m.text == "Message":
+                                    print(m.text)
+                                    m.click()
+                                    sleep(2)
+
+                                    #Subject
+                                    formInput1 = driver.find_element_by_xpath("//*[@class='compose-form__subject-field flex-none ember-text-field ember-view']")
+                                    formInput1.click()
+                                    sleep(2)
+                                    formInput1.send_keys(Subject)
+                                    # formInput1.send_keys('Job Offer')
+                                    sleep(2)
+
+                                    #MessageSend
+                                    formInput2 = driver.find_element_by_xpath("//*[@class='flex flex-column flex-grow-1 overflow-hidden']/section[1]/textarea")
+                                    formInput2.click()
+                                    sleep(2)
+                                    formInput2.send_keys(MessageSend)
+                                    # formInput2.send_keys('I have a great job offer for you')
+                                    sleep(2)
+                                    send = driver.find_element_by_xpath("//*[@class='flex flex-column flex-grow-1 overflow-hidden']/section[2]/span/button")
+                                    send.click()
+                                    sleep(2)
+
+                                    print("--- One Msg Sent Succefully ---")
+
+                            driver.execute_script("window.scrollTo(0, " + str(scrollLength) + ")")
+                            if scrollLength + 200 < length:
+                                scrollLength += 200
+                        except:
+                            print("-- Unsuccessfull, Msg Can't send --")
+                        #print(y)
+                        if count + 1 < Limit:
+                            count += 1
+                        else:
+                            break
+                        
+                    if count +1 < Limit:
+                        link = "https://www.linkedin.com/sales/search/people?doFetchHeroCard=false&geoIncluded=102713980&keywords=python&logHistory=false&page="+ str(page)+ "&preserveScrollPosition=false&relationship=S%2CO&rsLogId=770008140&searchSessionId=jh8CsJ15Sl2Qx4QQTraN7g%3D%3D"
+                        driver.get(link)
+                        print("Page : " + Page)
+                        page += 1
+                    else:
+                        print("Limit Is Reached... Messaage Send Stopped...")
+                        break
+            except:
+                print("Error!! In Sending Messages...")
+
         if Limit == 0 and url:
             for x in url:
                 driver.get(x)
@@ -166,7 +300,7 @@ def LinkedInMsg():
                         print("Connection Found")
                 except:
                     print("Connection is not connected")
-        elif Limit > 0 and not len(url):
+        elif Limit > 0 and not len(url) and (not Geography):
             chatWindowClose()
             sleep(2)
             driver.get("https://www.linkedin.com/search/results/people/?network=%5B%22F%22%5D&origin=MEMBER_PROFILE_CANNED_SEARCH")
