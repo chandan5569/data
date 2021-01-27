@@ -52,16 +52,16 @@ Relationship = sys.argv[5]
 Relationship = Relationship.split() #Converting string into list Relationship -> ['2', '3']
 
 # Subject = "Job Offer"
-Subject = sys.argv[6]
+#Subject = sys.argv[6]
 
 # MessageSend = 'Thanks :)'
-MessageSend = sys.argv[7]
+MessageSend = sys.argv[6]
 
-url = ast.literal_eval(sys.argv[8])
+url = ast.literal_eval(sys.argv[7])
 
-Limit = int(sys.argv[9])
+Limit = int(sys.argv[8])
 
-print(EmailId, " ", Password, " ", MessageSend, " ", url, " ", Limit)
+print(EmailId, " ", Password, " ", KeyWord, " ", Geography, " ", Relationship, " ",  MessageSend, " ", url, " ", Limit)
 
 #DB connection
 client = pymongo.MongoClient('mongodb+srv://sumi:'+urllib.parse.quote_plus('sumi@123')+'@codemarket-staging.k16z7.mongodb.net/codemarket_shiraz?retryWrites=true&w=majority')
@@ -157,13 +157,13 @@ def LinkedInMsg():
     #Finding 
     try: 
         # Python Script That Sends Messages To 2nd & 3rd Degree Connections (Geography +) In Linkedin Sales Navigator
-        if KeyWord and Geography and Relationship and Subject and MessageSend and Limit:
+        if KeyWord and Geography and Relationship and MessageSend and Limit:
 
             #Linkedin Sales Navigator
             driver.get('https://www.linkedin.com/sales/homepage')
 
             #KeyWord
-            sleep(2)
+            sleep(3)
             searchBar = driver.find_element_by_xpath("//*[@id='global-typeahead-search-input']")
             sleep(3)
             searchBar.click()
@@ -208,73 +208,173 @@ def LinkedInMsg():
                                 print("-- Relationship Selected --")
                                 #print("yess", buttonRelationship.text)
                                 break
-            
+
+            #Invitation send
             ol = driver.find_element_by_xpath("//*[@class='search-results__result-list']")
             sleep(2)
             try:
                 count = 0
                 page = 1
                 while count < Limit:
-                    print("Message sending is in progress...")
+                    print("Invitation sending is in progress...")
+
+                    #Scroll Length
                     length = driver.execute_script("return document.documentElement.scrollHeight")
-                    scrollLength = 200
+                    scrollLength = 180
+                    driver.execute_script("window.scrollTo(0, 0)")
+
+                    #Going through all tab of connection profile
                     for x in ol.find_elements_by_xpath("./li"):
                         #print(x)
                         try:
+                            #3Dots
                             y = x.find_element_by_xpath("div[2]/div/div/div/article/section[1]/div[2]/ul/li/div/div[2]")
                             y.click()
                             sleep(2)
-                            messagediv = x.find_element_by_xpath("div[2]/div/div/div/article/section[1]/div[2]/ul/li/div/div[2]/div/div/div/div/ul")
-                            #print(len(messagediv.find_elements_by_xpath("./li")))
-                            for m in messagediv.find_elements_by_xpath("./li"):
+
+                            div = x.find_element_by_xpath("div[2]/div/div/div/article/section[1]/div[2]/ul/li/div/div[2]/div/div/div/div/ul")
+                            #print(len(div.find_elements_by_xpath("./li")))
+
+                            #Going through all list options
+                            for m in div.find_elements_by_xpath("./li"):
                                 #print("Hii")
-                                if m.text == "Message":
-                                    print(m.text)
-                                    m.click()
+                                #print(m.text)
+
+                                #For connect
+                                if m.text == "Connect":
+                                    try:
+                                        #print("If connect")
+                                        m.click()
+                                        sleep(2)
+
+                                        #textArea for wrirting note
+                                        textArea = driver.find_element_by_xpath("//*[@class='ember-text-area ember-view']")
+                                        textArea.click()
+                                        textArea.send_keys(MessageSend)
+                                        sleep(3)
+
+                                        #Click on send
+                                        buttonSend = driver.find_element_by_xpath("//*[@class='button-primary-medium connect-cta-form__send']")
+                                        buttonSend.click()
+                                        sleep(2)
+
+                                        print("--- Send Invitation successfully(Tab) ---")
+                                        break
+                                    except:
+                                        print("--Error while sending invitation from tab--")
+
+                                #For pending        
+                                elif m.text == "Pending":
+                                    y.click() #Clciking on again to see below tab's button
+                                    print("-- Invitation is pending --")
+                                    break
+
+                                #For View profile
+                                elif m.text == "View profile":
+                                    #print("Else View Profile")
+                                    first_link = m.find_element_by_tag_name('a')
+                                    
+                                    #Save the window opener (current window)
+                                    main_window = driver.current_window_handle
+                                    
+                                    #Open the link in a new tab by sending key strokes on the element
+                                    first_link.send_keys(Keys.CONTROL + Keys.RETURN)
                                     sleep(2)
 
-                                    #Subject
-                                    formInput1 = driver.find_element_by_xpath("//*[@class='compose-form__subject-field flex-none ember-text-field ember-view']")
-                                    formInput1.click()
-                                    sleep(2)
-                                    formInput1.send_keys(Subject)
-                                    # formInput1.send_keys('Job Offer')
+                                    # Switch tab to the new tab, which we will assume is the next one on the right
+                                    driver.switch_to.window(driver.window_handles[1])
+                                    sleep(4)
+
+                                    #view profile dots 
+                                    viewProfileDots = driver.find_element_by_xpath("(//*[@class='profile-topcard-actions flex align-items-center mt2']/div)[last()]")
+                                    viewProfileDots.click()
                                     sleep(2)
 
-                                    #MessageSend
-                                    formInput2 = driver.find_element_by_xpath("//*[@class='flex flex-column flex-grow-1 overflow-hidden']/section[1]/textarea")
-                                    formInput2.click()
-                                    sleep(2)
-                                    formInput2.send_keys(MessageSend)
-                                    # formInput2.send_keys('I have a great job offer for you')
-                                    sleep(2)
-                                    send = driver.find_element_by_xpath("//*[@class='flex flex-column flex-grow-1 overflow-hidden']/section[2]/span/button")
-                                    send.click()
-                                    sleep(2)
+                                    #view profile list options
+                                    viewProfileConnect = viewProfileDots.find_element_by_xpath("div/div/div/div/ul")
+                                    for x in viewProfileConnect.find_elements_by_xpath("./li"):
+                                        try:
+                                            #print("Tab")
+                                            #For connect
+                                            if x.text == "Connect":
+                                                x.click()
+                                                sleep(2)
 
-                                    print("--- One Msg Sent Succefully ---")
+                                                textArea = driver.find_element_by_xpath("//*[@class='ember-text-area ember-view']")
+                                                textArea.click()
+                                                sleep(2)
+                                                textArea.send_keys(MessageSend)
+                                                sleep(3)
+
+                                                buttonSend = driver.find_element_by_xpath("//*[@class='button-primary-medium connect-cta-form__send']")
+                                                buttonSend.click()
+                                                sleep(2)
+                                                print("--- Send Invitation successfully ---")
+                                                break
+
+                                            #For pending
+                                            elif x.text == "Pending":
+                                                print("--- Invitation is pending ---")
+                                                break
+                                        except:
+                                            print("--- Send Invitation error or Invitation is pending ---")
+                                            
+                                    #Close the new tab
+                                    driver.close()
+
+                                    #Switch back to old tab
+                                    driver.switch_to.window(main_window)
+                                    break
+                                # if m.text == "Message":
+                                #     print(m.text)
+                                #     m.click()
+                                #     sleep(2)
+
+                                #     #Subject
+                                #     formInput1 = driver.find_element_by_xpath("//*[@class='compose-form__subject-field flex-none ember-text-field ember-view']")
+                                #     formInput1.click()
+                                #     sleep(2)
+                                #     formInput1.send_keys(Subject)
+                                #     # formInput1.send_keys('Job Offer')
+                                #     sleep(2)
+
+                                #     #MessageSend
+                                #     formInput2 = driver.find_element_by_xpath("//*[@class='flex flex-column flex-grow-1 overflow-hidden']/section[1]/textarea")
+                                #     formInput2.click()
+                                #     sleep(2)
+                                #     formInput2.send_keys(MessageSend)
+                                #     # formInput2.send_keys('I have a great job offer for you')
+                                #     sleep(2)
+                                #     send = driver.find_element_by_xpath("//*[@class='flex flex-column flex-grow-1 overflow-hidden']/section[2]/span/button")
+                                #     send.click()
+                                #     sleep(2)
+
+                                #     print("--- One Msg Sent Succefully ---")
 
                             driver.execute_script("window.scrollTo(0, " + str(scrollLength) + ")")
-                            if scrollLength + 200 < length:
-                                scrollLength += 200
+                            if scrollLength + 180 < length:
+                                scrollLength += 180
                         except:
-                            print("-- Unsuccessfull, Msg Can't send --")
-                        #print(y)
+                            print("-- Unsuccessfull, Invitation Can't send --")
+
+                        print("Count : ", count)
                         if count + 1 < Limit:
                             count += 1
                         else:
                             break
-                        
+
                     if count +1 < Limit:
                         link = "https://www.linkedin.com/sales/search/people?doFetchHeroCard=false&geoIncluded=102713980&keywords=python&logHistory=false&page="+ str(page)+ "&preserveScrollPosition=false&relationship=S%2CO&rsLogId=770008140&searchSessionId=jh8CsJ15Sl2Qx4QQTraN7g%3D%3D"
                         driver.get(link)
                         print("Page : " + Page)
                         page += 1
                     else:
-                        print("Limit Is Reached... Messaage Send Stopped...")
+                        print("Limit Is Reached... Invitation Send Stopped...")
                         break
+
             except:
-                print("Error!! In Sending Messages...")
+                    print("Error!! In Sending Invitation...")
+                    traceback.print_exc()
 
         if Limit == 0 and url:
             for x in url:
