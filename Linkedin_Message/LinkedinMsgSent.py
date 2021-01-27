@@ -13,9 +13,9 @@ import pymongo
 import ast
 # from selenium.webdriver import ActionChains
 
-# New Input : python LinkedinMsgSent.py <Email> <Password> <Keyword> <Geography> <Relationship in quotes separted by spaces> <Subject> <MessageSend> <Now Empty list for url> <Limit(count)>
+# New Input : python LinkedinMsgSent.py <Email> <Password> <Keyword> <Geography> <Relationship in quotes separted by spaces> <MessageSend> <Now Empty list for url> <Limit(count)>
 
-# New Input : python LinkedinMsgSent.py email@gmail.com password python India "2 3" "Job offer" "I have a great job offer for you" [] 5
+# New Input : python LinkedinMsgSent.py email@gmail.com password python India "2 3" "I have a great job offer for you" [] 5
 
 # Input : python LinkedinMsgSent.py email@gmail.com password HelloWorld "['https://www.linkedin.com/in/nooras-fatima-ansari-2542b3171/', 'https://www.linkedin.com/in/daniel-piersch-ba003b71/'] 0
 
