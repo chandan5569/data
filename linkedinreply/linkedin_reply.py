@@ -14,6 +14,9 @@ from mongoengine.context_managers import switch_collection
 
 Email_id = sys.argv[1]
 Password = sys.argv[2]
+input_message = sys.argv[3]
+# print(input_message)
+
 sleeps = [2,3,4]
 def otp():
     client = pymongo.MongoClient('mongodb+srv://bilalm:' + urllib.parse.quote_plus('Codemarket.123') + '@codemarket-staging.k16z7.mongodb.net/dreamjobpal?retryWrites=true&w=majority')
@@ -65,8 +68,8 @@ chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument('--disable-dev-shm-usage')
 
-# PATH= r"/usr/local/bin/chromedriver"
-PATH = r"C:\Users\BILAL\Projects\LinkedInScraper\chromedriver.exe"
+PATH= r"/usr/local/bin/chromedriver"
+# PATH = r"C:\Users\BILAL\Projects\LinkedInScraper\chromedriver.exe"
 driver = webdriver.Chrome(PATH,options=chrome_options)
 
 
@@ -138,11 +141,16 @@ for enu,chat in enumerate(chats):
                 if msg == 'I have a great job opportunity for you' or msg == 'I have a great job opportunity for you.':
                     print("Replying")
 
-                    message = f"www.soozzi.com/job?linkedinurl=={profile_link}&&firstname={first_name}&&lastname={last_name}"
+                    message = f"www.soozzi.com/job?linkedinurl={profile_link}&firstname={first_name}&lastname={last_name}"
                     reply = driver.find_element_by_xpath("//div[@aria-label='Write a message…']")
                     time.sleep(random.choice(sleeps))
-                    reply.send_keys(message)
+                    reply.send_keys(input_message)
                     send_reply = driver.find_element_by_xpath("//button[@type='submit']")
+                    time.sleep(random.choice(sleeps))
+                    send_reply.send_keys(Keys.RETURN)
+
+                    reply.send_keys(message)
+                    # send_reply = driver.find_element_by_xpath("//button[@type='submit']")
                     time.sleep(random.choice(sleeps))
                     send_reply.send_keys(Keys.RETURN)
 
