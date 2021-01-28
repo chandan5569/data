@@ -15,7 +15,7 @@ import ast
 
 # New Input : python LinkedinMsgSent.py <Email> <Password> <Keyword> <Geography> <Relationship in quotes separted by spaces> <MessageSend> <Now Empty list for url> <Limit(count)>
 
-# New Input : python LinkedinMsgSent.py email@gmail.com password python India "2 3" "I have a great job offer for you" [] 5
+# New Input : python LinkedinMsgSent.py email@gmail.com password python India "2 3" "I have a great job offer for you" "" 5
 
 # Input : python LinkedinMsgSent.py email@gmail.com password HelloWorld "['https://www.linkedin.com/in/nooras-fatima-ansari-2542b3171/', 'https://www.linkedin.com/in/daniel-piersch-ba003b71/'] 0
 
@@ -25,11 +25,11 @@ print("Script Started running...")
 chrome_options = Options()
 chrome_options.add_argument(" — incognito")
 chrome_options.add_argument("--window-size=1920,1200");
-# chrome_options.add_argument('--headless')
-# chrome_options.add_argument("--disable-dev-shm-usage")
-# chrome_options.add_argument("--no-sandbox")
-# driver = webdriver.Chrome(r'/usr/local/bin/chromedriver', options=chrome_options)
-driver = webdriver.Chrome(options=chrome_options)
+chrome_options.add_argument('--headless')
+chrome_options.add_argument("--disable-dev-shm-usage")
+chrome_options.add_argument("--no-sandbox")
+driver = webdriver.Chrome(r'/usr/local/bin/chromedriver', options=chrome_options)
+#driver = webdriver.Chrome(options=chrome_options)
 
 #Taking Input
 # EmailId = 'donnybegins@gmail.com'
@@ -57,11 +57,12 @@ Relationship = Relationship.split() #Converting string into list Relationship ->
 # MessageSend = 'Thanks :)'
 MessageSend = sys.argv[6]
 
-url = ast.literal_eval(sys.argv[7])
+url = sys.argv[7]
+url = url.split()
 
 Limit = int(sys.argv[8])
 
-print(EmailId, " ", Password, " ", KeyWord, " ", Geography, " ", Relationship, " ",  MessageSend, " ", url, " ", Limit)
+#print(EmailId, " ", Password, " ", KeyWord, " ", Geography, " ", Relationship, " ",  MessageSend, " ", url, " ", Limit)
 
 #DB connection
 client = pymongo.MongoClient('mongodb+srv://sumi:'+urllib.parse.quote_plus('sumi@123')+'@codemarket-staging.k16z7.mongodb.net/codemarket_shiraz?retryWrites=true&w=majority')
@@ -79,7 +80,7 @@ def otp():
         # print(len(data))
         if len(data) == 1:
             # print(data[0]['OTP'])
-            otp = data[0]['OTP']
+            otpget = data[0]['OTP']
             # print("otp is: ",otp)
             otp_collection.update_many( 
             {"linkedin_login_url":EmailId, "Status":"OTP updated"}, 
@@ -89,7 +90,7 @@ def otp():
         print("Waiting for correct OTP...")
         sleep(15)
     submit_otp = driver.find_element_by_name("pin")
-    submit_otp.send_keys(otp)
+    submit_otp.send_keys(otpget)
     submit_otp.send_keys(Keys.RETURN)
 
     if driver.current_url == 'https://www.linkedin.com/checkpoint/challenge/verify':
@@ -97,6 +98,7 @@ def otp():
         sleep(2)
         otp_collection.drop()
         print("Incorrect OTP. Enter correct otp.")
+        print(driver.current_url)
         #otp_collection.drop()
         otp()
 
@@ -140,6 +142,7 @@ def LinkedInMsg():
     if 'https://www.linkedin.com/checkpoint/lg/login?errorKey=challenge_global_internal_error' in driver.current_url:
         print("Sorry something went wrong. Please try again later")
 
+    print("Current Url : " + driver.current_url)
     if "https://www.linkedin.com/checkpoint" in driver.current_url:
         print("OTP...")
         value = otp()
@@ -171,7 +174,7 @@ def LinkedInMsg():
             searchBar.send_keys(KeyWord)
             sleep(2)
             searchBar.send_keys(Keys.RETURN)
-            print("-- Keyord is selected --")
+            print("-- Keyword is selected --")
 
             #Geography and Relationship
             ul = driver.find_element_by_xpath("//*[@class='search-filter__list collapsible-container is-expanded ember-view']")
@@ -214,7 +217,7 @@ def LinkedInMsg():
             sleep(2)
             try:
                 count = 0
-                page = 1
+                page = 2 #bydafault page 1 is loaded
                 while count < Limit:
                     print("Invitation sending is in progress...")
 
