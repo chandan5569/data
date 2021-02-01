@@ -26,6 +26,6 @@ RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 # copy code
-COPY /YelpSpiceSixMenuScraping.py  /home/ubuntu/docker_ec2/YelpSpiceSixMenuScraping.py
+COPY /RestaurantMenu.py  /home/ubuntu/docker_ec2/RestaurantMenu.py
 
-ENTRYPOINT ["python","YelpSpiceSixMenuScraping.py"]
+ENTRYPOINT ["python","RestaurantMenu.py"]
