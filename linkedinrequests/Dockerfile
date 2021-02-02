@@ -26,6 +26,6 @@ RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 # copy code
-COPY /linkedin_request1.py  /home/ubuntu/docker_ec2/linkedin_request1.py
+COPY /linkedin_request.py  /home/ubuntu/docker_ec2/linkedin_request.py
 
-ENTRYPOINT ["python","linkedin_request1.py"]
+ENTRYPOINT ["python","linkedin_request.py"]

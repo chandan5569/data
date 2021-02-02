@@ -29,7 +29,7 @@ chrome_options.add_argument('--headless')
 chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--no-sandbox")
 driver = webdriver.Chrome(r'/usr/local/bin/chromedriver', options=chrome_options)
-#driver = webdriver.Chrome(options=chrome_options)
+# driver = webdriver.Chrome(options=chrome_options)
 
 #Taking Input
 # EmailId = 'donnybegins@gmail.com'
@@ -164,6 +164,7 @@ def LinkedInMsg():
 
             #Linkedin Sales Navigator
             driver.get('https://www.linkedin.com/sales/homepage')
+            print("Redirected to linkedin sales navigator.")
 
             #KeyWord
             sleep(3)
@@ -219,11 +220,12 @@ def LinkedInMsg():
                 count = 0
                 page = 2 #bydafault page 1 is loaded
                 while count < Limit:
+                    sleep(5)
                     print("Invitation sending is in progress...")
 
                     #Scroll Length
                     length = driver.execute_script("return document.documentElement.scrollHeight")
-                    scrollLength = 180
+                    scrollLength = 150
                     driver.execute_script("window.scrollTo(0, 0)")
 
                     #Going through all tab of connection profile
@@ -233,7 +235,7 @@ def LinkedInMsg():
                             #3Dots
                             y = x.find_element_by_xpath("div[2]/div/div/div/article/section[1]/div[2]/ul/li/div/div[2]")
                             y.click()
-                            sleep(2)
+                            sleep(3)
 
                             div = x.find_element_by_xpath("div[2]/div/div/div/article/section[1]/div[2]/ul/li/div/div[2]/div/div/div/div/ul")
                             #print(len(div.find_elements_by_xpath("./li")))
@@ -250,19 +252,27 @@ def LinkedInMsg():
                                         m.click()
                                         sleep(2)
 
-                                        #textArea for wrirting note
-                                        textArea = driver.find_element_by_xpath("//*[@class='ember-text-area ember-view']")
-                                        textArea.click()
-                                        textArea.send_keys(MessageSend)
-                                        sleep(3)
+                                        try:
+                                            driver.find_element_by_xpath("//*[@id='connect-cta-form__email']")
+                                            cancel = driver.find_element_by_xpath("//*[@class='button-secondary-medium mr4 connect-cta-form__cancel']")
+                                            cancel.click()
+                                            sleep(2)
+                                            print("--Email required to send invitation, Invitation send cancel--")
+                                            break
+                                        except:
+                                            #textArea for wrirting note
+                                            textArea = driver.find_element_by_xpath("//*[@class='ember-text-area ember-view']")
+                                            textArea.click()
+                                            textArea.send_keys(MessageSend)
+                                            sleep(3)
 
-                                        #Click on send
-                                        buttonSend = driver.find_element_by_xpath("//*[@class='button-primary-medium connect-cta-form__send']")
-                                        buttonSend.click()
-                                        sleep(2)
+                                            #Click on send
+                                            buttonSend = driver.find_element_by_xpath("//*[@class='button-primary-medium connect-cta-form__send']")
+                                            buttonSend.click()
+                                            sleep(2)
 
-                                        print("--- Send Invitation successfully(Tab) ---")
-                                        break
+                                            print("--- Send Invitation successfully(Tab) ---")
+                                            break
                                     except:
                                         print("--Error while sending invitation from tab--")
 
@@ -355,10 +365,11 @@ def LinkedInMsg():
                                 #     print("--- One Msg Sent Succefully ---")
 
                             driver.execute_script("window.scrollTo(0, " + str(scrollLength) + ")")
-                            if scrollLength + 180 < length:
-                                scrollLength += 180
+                            if scrollLength + 150 < length:
+                                scrollLength += 150
                         except:
                             print("-- Unsuccessfull, Invitation Can't send --")
+                            # traceback.print_exc()
 
                         print("Count : ", count)
                         if count + 1 < Limit:
@@ -367,9 +378,16 @@ def LinkedInMsg():
                             break
 
                     if count +1 < Limit:
-                        link = "https://www.linkedin.com/sales/search/people?doFetchHeroCard=false&geoIncluded=102713980&keywords=python&logHistory=false&page="+ str(page)+ "&preserveScrollPosition=false&relationship=S%2CO&rsLogId=770008140&searchSessionId=jh8CsJ15Sl2Qx4QQTraN7g%3D%3D"
+                        oldPage = "page="+str(page-1)
+                        newPage = "page="+str(page)
+                        link = driver.current_url
+                        link = link.replace(oldPage, newPage)
+                        # link = "https://www.linkedin.com/sales/search/people?doFetchHeroCard=false&geoIncluded=102713980&keywords=python&logHistory=false&page="+ str(page)+ "&preserveScrollPosition=false&relationship=S%2CO&rsLogId=770008140&searchSessionId=jh8CsJ15Sl2Qx4QQTraN7g%3D%3D"
                         driver.get(link)
-                        print("Page : " + Page)
+                        sleep(7)
+                        ol = driver.find_element_by_xpath("//*[@class='search-results__result-list']")
+                        sleep(2)
+                        print("Page : " , page)
                         page += 1
                     else:
                         print("Limit Is Reached... Invitation Send Stopped...")
