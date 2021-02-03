@@ -313,9 +313,14 @@ def send_connection_request():
     client = pymongo.MongoClient('mongodb+srv://bilalm:' + urllib.parse.quote_plus('Codemarket.123') + '@codemarket-staging.k16z7.mongodb.net/dreamjobpal?retryWrites=true&w=majority')
     my_db = client['dreamjobpal']
     db = my_db.linkedinContacts
-    
-    PATH = r"C:\Users\BILAL\Projects\LinkedInScraper\chromedriver.exe"
-    driver = webdriver.Chrome(PATH)
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument('--disable-dev-shm-usage')
+    # PATH = r"C:\Users\BILAL\Projects\LinkedInScraper\chromedriver.exe"
+    PATH=r"/usr/local/bin/chromedriver"
+    driver = webdriver.Chrome(PATH,options=chrome_options)
     
     sleeps = [2,3,4]
     driver.get("https://www.linkedin.com/login")
