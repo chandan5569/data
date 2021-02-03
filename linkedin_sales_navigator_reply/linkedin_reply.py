@@ -88,10 +88,6 @@ driver.get("https://www.linkedin.com/sales/inbox")
 
 sleep(10)
 
-ul = driver.find_element_by_xpath("//*[@class='infinite-scroller is-scrollable ember-view overflow-y-auto overflow-hidden flex-grow-1']/ul")
-count = 1
-
-chats = ul.find_elements_by_xpath("./li")
 
 ul = driver.find_element_by_xpath("//*[@class='infinite-scroller is-scrollable ember-view overflow-y-auto overflow-hidden flex-grow-1']/ul")
 count = 1
