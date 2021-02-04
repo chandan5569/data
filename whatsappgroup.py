@@ -34,7 +34,7 @@ class ViewGroupDetails(unittest.TestCase):
         self.driver.maximize_window()
          # driver should wait implicitly for a given duration, for the element under consideration to load.
         # to enforce this setting we will use builtin implicitly_wait() function of our 'driver' object.
-        self.driver.implicitly_wait(15)  #10 is in seconds
+        self.driver.implicitly_wait(10)  #10 is in seconds
 
     # --- Steps for Whatsapp_Group_TC_001 ---
     def test_WhatsApp_Group_TC_001_create_group(self):
