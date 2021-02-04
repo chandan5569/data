@@ -5,7 +5,7 @@ I have recently added the virtual environment whatsappgroup.
 
 For windows, go to the cmd, and the path where the virtual environment is located. 
 
-Type: (name of virtual environment)\Scripts\activate
+Type: (name of virtual environment)\Scripts\activate.
 Next, type python script.py to run the main program.
 
 Please change the username and path in the config.py file based on your platform.
