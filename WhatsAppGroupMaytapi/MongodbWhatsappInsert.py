@@ -12,10 +12,10 @@ collection = db.whatsapp
 
 adminNo = "919773740579"
 
-otherNo = "918097068954 8053007217 917276864773 18059055170"
+otherNo = "18053007217"
 otherNo = otherNo.split()
 
-groupName = "Testing Group 4"
+groupName = "Testing WA Group"
 
 message = "Welcome"
 
@@ -23,8 +23,9 @@ MemberNo = {'Number': otherNo}
 df=pd.DataFrame(data=MemberNo)
 MemberNo = df.to_dict("records")
 
-collection.insert_one({"AdminNumber": adminNo, "MemberNumber": MemberNo, "GroupName": groupName, "Message": message})
-x = collection.find({})
+collection.insert_one({"AdminNumber": adminNo, "MemberNumber": MemberNo, "GroupName": groupName, "Message": message, "Status": "Group not created"})
+x = collection.find({"Status": "Group not created"})
 
 for y in x:
-    print(y['AdminNumber'], y['MemberNumber'], y['GroupName'], y['Message'])
+    # print(y)
+    print(y['AdminNumber'], y['MemberNumber'], y['GroupName'], y['Message'], y['Status'])
