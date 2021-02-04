@@ -11,5 +11,7 @@ Please refer to the config.py file for more details.
 
 If script.py quits unexpectedly, check your internet connectivity. 
 As the task is to automate the browser, the program is susceptible to network fluctuations. Please try again. 
+Additionally, you can increase the time in the implicitly_wait() function under the setUp function of whatsappgroup.py 
+(15-20 would be the recommended maximum). 
 
 Feel free to report any issues and queries. 
