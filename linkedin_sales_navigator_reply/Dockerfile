@@ -26,6 +26,6 @@ RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 # copy code
-COPY /otp.py  /home/ubuntu/docker_ec2/otp.py
+COPY /linkedin_reply.py  /home/ubuntu/docker_ec2/linkedin_reply.py
 
-ENTRYPOINT ["python","otp.py"]
+ENTRYPOINT ["python","linkedin_reply.py"]

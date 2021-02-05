@@ -26,14 +26,15 @@ sleeps = [2,3,4]
 chrome_options = Options()
 # chrome_options.add_argument(" — incognito")
 # chrome_options.add_argument("--window-size=1920,1200")
-# chrome_options.add_argument('--headless')
-# chrome_options.add_argument("--disable-dev-shm-usage")
-# chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument('--headless')
+chrome_options.add_argument("--disable-gpu")
+chrome_options.add_argument("--disable-dev-shm-usage")
+chrome_options.add_argument("--no-sandbox")
 
-PATH = r"C:\Users\BILAL\Projects\LinkedInScraper\chromedriver.exe"
-# PATH= r"/usr/local/bin/chromedriver"
-chrome_options = Options()
-driver = webdriver.Chrome(PATH,options=chrome_options)
+# PATH = r"C:\Users\BILAL\Projects\LinkedInScraper\chromedriver.exe"
+PATH= "/usr/local/bin/chromedriver"
+# chrome_options = Options()
+driver = webdriver.Chrome(PATH,chrome_options=chrome_options)
 
 
 def otp():
@@ -106,7 +107,7 @@ for enu,x in enumerate(chats):
 
     #Chat Inbox
     inbox = driver.find_element_by_xpath("//*[@class='flex flex-column flex-grow-1 flex-shrink-zero justify-flex-end ember-view']/ul")
-    print(len(inbox.find_elements_by_xpath("./li")))
+    # print(len(inbox.find_elements_by_xpath("./li")))
     for i in inbox.find_elements_by_xpath("./li"):
         try:
                          #Checking for inmail message - if found then break the loop and moving to next connection - else Normal message
@@ -133,6 +134,8 @@ for enu,x in enumerate(chats):
 
                 first_name = x.text.replace('\n', ' ').strip().split(' ')[0]
                 last_name = x.text.replace('\n', ' ').strip().split(' ')[1]
+                print(first_name)
+                print(last_name)
 
                 #Getting profile url by navigating into the profile
 
@@ -181,7 +184,7 @@ for enu,x in enumerate(chats):
                 send = driver.find_element_by_xpath("//button[@class='artdeco-button artdeco-button--2 artdeco-button--primary ember-view ml4']")
                 send.click()
 
-                message = f"www.soozzi.com/job?linkedinurl={linkedin_url}&firstname={first_name}&lastname={last_name}"
+                message = f"https://www.soojji.com/profile_edit?linkedinurl={linkedin_url}&firstname={first_name}&lastname={last_name}"
                 textArea.send_keys(message) 
                 time.sleep(random.choice(sleeps))
                 send = driver.find_element_by_xpath("//button[@class='artdeco-button artdeco-button--2 artdeco-button--primary ember-view ml4']").click()

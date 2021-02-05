@@ -141,7 +141,7 @@ for enu,chat in enumerate(chats):
                 if msg == 'I have a great job opportunity for you' or msg == 'I have a great job opportunity for you.':
                     print("Replying")
 
-                    message = f"www.soozzi.com/job?linkedinurl={profile_link}&firstname={first_name}&lastname={last_name}"
+                    message = f"https://www.soojji.com/profile_edit?linkedinurl={profile_link}&firstname={first_name}&lastname={last_name}"
                     reply = driver.find_element_by_xpath("//div[@aria-label='Write a message…']")
                     time.sleep(random.choice(sleeps))
                     reply.send_keys(input_message)
