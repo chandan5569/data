@@ -1,4 +1,3 @@
-
 import unittest
 import HtmlTestRunner
 import time
@@ -34,7 +33,7 @@ class ViewGroupDetails(unittest.TestCase):
         self.driver.maximize_window()
          # driver should wait implicitly for a given duration, for the element under consideration to load.
         # to enforce this setting we will use builtin implicitly_wait() function of our 'driver' object.
-        self.driver.implicitly_wait(10)  #10 is in seconds
+        self.driver.implicitly_wait(15)  #10 is in seconds
 
     # --- Steps for Whatsapp_Group_TC_001 ---
     def test_WhatsApp_Group_TC_001_create_group(self):
@@ -81,7 +80,7 @@ class ViewGroupDetails(unittest.TestCase):
         group_admin_inp.send_keys(Keys.RETURN)
 
         self.driver.find_element_by_xpath('//div/div/span/div/div[@data-animate-btn="true"]/div[@role="button"]').click()
-        self.assertTrue(int((self.driver.find_element_by_xpath('//*[@id="main"]/header/div[2]/div[1]/div/span').text)==self.message))
+        self.assertTrue(int((self.driver.find_element_by_xpath('//*[@id="main"]/header/div[2]/div[1]/div/span').text)==self.group_name))
     
      # --- post - condition ---
     def tearDown(self):
